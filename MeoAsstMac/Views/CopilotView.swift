@@ -43,9 +43,9 @@ struct CopilotView: View {
     
     private func addToCopilotList() {
         guard let pilot = copilot else { return }
-        let name = pilot.doc?.title ?? url.lastPathComponent
-        viewModel.addToCopilotList(filename: url.path, name: name)
-        // REMOVEME: 每次添加是否需要跳转到战斗列表？
+        
+        viewModel.addToCopilotList(copilot: pilot, url: url)
+        // REMOVE ME: 每次添加是否需要跳转到战斗列表？
         // viewModel.useCopilotList = true
     }
 
