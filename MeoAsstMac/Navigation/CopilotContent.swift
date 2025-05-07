@@ -31,16 +31,18 @@ struct CopilotContent: View {
 
     @ToolbarContentBuilder private func listToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
-            Button(action: {
-                if let selection {
-                    deleteCopilot(url: selection)
+            if !viewModel.useCopilotList {  // 只在非战斗列表模式显示移除按钮
+                Button(action: {
+                    if let selection {
+                        deleteCopilot(url: selection)
+                    }
+                }) {
+                    Label("移除", systemImage: "trash")
                 }
-            }) {
-                Label("移除", systemImage: "trash")
+                .help("移除作业")
+                .disabled(!canDelete(selection))
+                .keyboardShortcut(.delete, modifiers: [.command])
             }
-            .help("移除作业")
-            .disabled(!canDelete(selection))
-            .keyboardShortcut(.delete, modifiers: [.command])
 
             Button(action: toggleCopilotList) {
                 Label(
