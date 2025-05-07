@@ -90,6 +90,40 @@ import SwiftUI
     @Published var showImportCopilot = false
     @Published var copilotDetailMode: CopilotDetailMode = .log
 
+    @AppStorage("MAAUseCopilotList") var useCopilotList = false
+
+    private var updatingCopilotListConfig = false
+
+    @AppStorage("MAACopilotListConfig") private var savedCopilotListConfig: String = "{}" {
+        didSet {
+            guard !updatingCopilotListConfig else { return }
+            updatingCopilotListConfig = true
+            // debug: print savedCopilotListConfig
+            print("savedCopilotListConfig: \(savedCopilotListConfig)")
+            if let data = savedCopilotListConfig.data(using: .utf8),
+                let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data)
+            {
+                copilotListConfig = config
+            }
+            updatingCopilotListConfig = false
+        }
+    }
+
+    @Published var copilotListConfig = CopilotListConfiguration() {
+        didSet {
+            guard !updatingCopilotListConfig else { return }
+            updatingCopilotListConfig = true
+            // debug: print copilotListConfig to be saved
+            print("copilotListConfig to be saved: \(copilotListConfig)")
+            if let data = try? JSONEncoder().encode(copilotListConfig),
+                let string = String(data: data, encoding: .utf8)
+            {
+                savedCopilotListConfig = string
+            }
+            updatingCopilotListConfig = false
+        }
+    }
+
     // MARK: - Recognition
 
     @Published var recruitConfig = RecruitConfiguration.recognition
@@ -155,6 +189,13 @@ import SwiftUI
         } catch {
             fileLogger = FileLogger()
             logError("日志文件出错: \(error.localizedDescription)")
+        }
+
+        // REMOVEME: Initialize copilotListConfig from savedCopilotListConfig
+        if let data = savedCopilotListConfig.data(using: .utf8),
+            let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data)
+        {
+            copilotListConfig = config
         }
 
         do {
@@ -461,24 +502,64 @@ extension MAAViewModel {
         status = .pending
         defer { handleEarlyReturn(backTo: .idle) }
 
-        guard let copilot,
-            let params = copilot.params
-        else {
-            return
+        if useCopilotList {
+            guard let params = copilotListConfig.params else { return }
+
+            try await ensureHandle()
+            for item in copilotListConfig.items where item.enabled {
+                // REMOVEME: print current item
+                print("Current item: \(item)")
+                // REMOVEME: print item.jsonString()
+                print("Item jsonString: \(try item.jsonString())")
+                _ = try await handle?.appendTask(type: .Copilot, params: item.jsonString())
+            }
+            try await handle?.start()
+        } else {
+            guard let copilot,
+                let params = copilot.params
+            else {
+                return
+            }
+
+            try await ensureHandle()
+
+            switch copilot {
+            case .regular:
+                _ = try await handle?.appendTask(type: .Copilot, params: params)
+            case .sss:
+                _ = try await handle?.appendTask(type: .SSSCopilot, params: params)
+            }
+
+            try await handle?.start()
         }
-
-        try await ensureHandle()
-
-        switch copilot {
-        case .regular:
-            _ = try await handle?.appendTask(type: .Copilot, params: params)
-        case .sss:
-            _ = try await handle?.appendTask(type: .SSSCopilot, params: params)
-        }
-
-        try await handle?.start()
 
         status = .busy
+    }
+
+    func addToCopilotList(filename: String, name: String, is_raid: Bool = false) {
+        let item = CopilotItemConfiguration(filename: filename, name: name, is_raid: is_raid)
+        copilotListConfig.items.append(item)
+    }
+
+    func removeFromCopilotList(at index: Int) {
+        copilotListConfig.items.remove(at: index)
+    }
+
+    func moveCopilotItem(from source: Int, to destination: Int) {
+        // REMOVEME: 这段代码是为了测试拖拽排序的功能
+
+        // guard !copilotListConfig.items.isEmpty,
+        //       source >= 0, source < copilotListConfig.items.count,
+        //       destination >= 0, destination <= copilotListConfig.items.count else {
+        //     return
+        // }
+        // let item = copilotListConfig.items.remove(at: source)
+        // copilotListConfig.items.insert(item, at: destination)
+
+        // 草原来 Swift 有内置的 move 方法啊，爽到
+
+        // use Swift's built-in move method
+        copilotListConfig.items.move(fromOffsets: IndexSet(integer: source), toOffset: destination)
     }
 }
 

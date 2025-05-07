@@ -40,6 +40,14 @@ struct CopilotView: View {
     private var copilot: MAACopilot? {
         MAACopilot(url: url)
     }
+    
+    private func addToCopilotList() {
+        guard let pilot = copilot else { return }
+        let name = pilot.doc?.title ?? url.lastPathComponent
+        viewModel.addToCopilotList(filename: url.path, name: name)
+        // REMOVEME: 每次添加是否需要跳转到战斗列表？
+        // viewModel.useCopilotList = true
+    }
 
     // MARK: - Copilot Config
 
@@ -51,9 +59,17 @@ struct CopilotView: View {
             } set: { newValue in
                 viewModel.copilot = .regular(newValue)
             }
-            HStack {
-                Toggle("自动编队", isOn: binding.formation)
-                Toggle("信赖干员", isOn: binding.add_trust)
+            VStack {
+                HStack {
+                    Toggle("自动编队", isOn: binding.formation)
+                    Toggle("信赖干员", isOn: binding.add_trust)
+                }
+                
+                Button(action: addToCopilotList) {
+                    Label("添加到战斗列表", systemImage: "plus.rectangle.on.rectangle")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(!binding.formation.wrappedValue)
             }
 
         case .sss(let innerConfig):
