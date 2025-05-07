@@ -45,13 +45,15 @@ struct CopilotDetail: View {
 
     @ToolbarContentBuilder private func detailToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
-            Button {
-                showAdd = true
-            } label: {
-                Label("添加", systemImage: "plus")
+            if !viewModel.useCopilotList { // 只在非战斗列表模式显示
+                Button {
+                    showAdd = true
+                } label: {
+                    Label("添加", systemImage: "plus")
+                }
+                .help("添加作业")
+                .popover(isPresented: $showAdd, arrowEdge: .bottom, content: addPopover)
             }
-            .help("添加作业")
-            .popover(isPresented: $showAdd, arrowEdge: .bottom, content: addPopover)
         }
 
         ToolbarItemGroup {
