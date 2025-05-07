@@ -323,6 +323,9 @@ extension MAAViewModel {
     ///
     /// Should be the outermost call to load resources.
     private func loadResource(channel: MAAClientChannel) async throws {
+        // Initialize map data
+        MapHelper.loadMapData()
+        
         let (preferUser, currentResourceVersion) = try resourceChannel.version()
         try await loadResource(url: Bundle.main.resourceURL!, channel: channel)
 
@@ -506,14 +509,24 @@ extension MAAViewModel {
             guard let params = copilotListConfig.params else { return }
 
             try await ensureHandle()
+
+            // Handle each enabled copilot item sequentially
             for item in copilotListConfig.items where item.enabled {
-                // REMOVEME: print current item
-                print("Current item: \(item)")
-                // REMOVEME: print item.jsonString()
-                print("Item jsonString: \(try item.jsonString())")
+
+                if let itemJson = try? item.jsonString() {
+                    logTrace(
+                    """
+                    CopilotListItem JSON:
+                    \(itemJson)
+                    """
+                    )
+                }
+
                 _ = try await handle?.appendTask(type: .Copilot, params: item.jsonString())
+
+                // Start after appending each task 
+                try await handle?.start()
             }
-            try await handle?.start()
         } else {
             guard let copilot,
                 let params = copilot.params
@@ -536,8 +549,30 @@ extension MAAViewModel {
         status = .busy
     }
 
-    func addToCopilotList(filename: String, name: String, is_raid: Bool = false) {
-        let item = CopilotItemConfiguration(filename: filename, name: name, is_raid: is_raid)
+    func addToCopilotList(copilot: MAACopilot, url: URL) {
+        let name = copilot.doc?.title ?? url.lastPathComponent
+        let is_raid = copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue
+
+        // Get stage name
+        let stage_name = copilot.stage_name
+        guard !stage_name.isEmpty else {
+            logError("关卡名不能为空")
+            return
+        }
+        
+        // Get navigation map name 
+        guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
+            logError("Map '\(stage_name)' not found, resource update may be needed")
+            // Show resource update dialog
+            showResourceUpdate = true
+            return
+        }
+        
+        let item = CopilotItemConfiguration(filename: url.path, 
+                                          name: name, 
+                                          is_raid: is_raid,
+                                          need_navigate: true,
+                                          navigate_name: navigate_name)
         copilotListConfig.items.append(item)
     }
 

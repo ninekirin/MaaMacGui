@@ -96,6 +96,7 @@
 		92F78D4F2A0B361C00999BD0 /* TaskTimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F78D4E2A0B361C00999BD0 /* TaskTimerManager.swift */; };
 		9BF8E46C2DCA6F6D00F8DC64 /* CopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */; };
 		9BF8E46D2DCA6F6D00F8DC64 /* RegularCopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */; };
+		9BF8E4752DCBCF1C00F8DC64 /* MapHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E4742DCBCF1C00F8DC64 /* MapHelper.swift */; };
 		9BFFE6F32DCA60A200699B2A /* CopilotListConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */; };
 /* End PBXBuildFile section */
 
@@ -217,6 +218,7 @@
 		92F78D4E2A0B361C00999BD0 /* TaskTimerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTimerManager.swift; sourceTree = "<group>"; };
 		9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotList.swift; sourceTree = "<group>"; };
 		9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegularCopilotList.swift; sourceTree = "<group>"; };
+		9BF8E4742DCBCF1C00F8DC64 /* MapHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHelper.swift; sourceTree = "<group>"; };
 		9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotListConfiguration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -460,6 +462,7 @@
 		92CDF6202A065E20005669EC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				9BF8E4742DCBCF1C00F8DC64 /* MapHelper.swift */,
 				92CDF6212A065E55005669EC /* Codeable+JSON.swift */,
 				92F78D4E2A0B361C00999BD0 /* TaskTimerManager.swift */,
 				8347B5AE2CDF925400AEB627 /* URLSession+downloadProgress.swift */,
@@ -631,6 +634,7 @@
 				83782A2B2CFFAF2900A32BDD /* LegacyConfigurations.swift in Sources */,
 				83264A2F29EBEE140074E33A /* RecruitConfiguration.swift in Sources */,
 				8341195029EC249E00044F45 /* RoguelikeConfiguration.swift in Sources */,
+				9BF8E4752DCBCF1C00F8DC64 /* MapHelper.swift in Sources */,
 				83264A2B29EBED780074E33A /* StartupConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

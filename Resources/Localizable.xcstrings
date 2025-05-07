@@ -367,6 +367,9 @@
         }
       }
     },
+    "CopilotListItem JSON:\n%@" : {
+
+    },
     "CurrentStage %@" : {
       "localizations" : {
         "ko" : {
@@ -965,6 +968,9 @@
     },
     "maa://" : {
       "shouldTranslate" : false
+    },
+    "Map '%@' not found, resource update may be needed" : {
+
     },
     "MedicineUsed %lld(+%lld) UnitTime" : {
       "localizations" : {
@@ -1838,6 +1844,9 @@
           }
         }
       }
+    },
+    "关卡名不能为空" : {
+
     },
     "关卡选择" : {
       "localizations" : {
