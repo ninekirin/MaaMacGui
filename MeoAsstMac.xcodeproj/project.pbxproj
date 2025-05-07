@@ -94,6 +94,9 @@
 		92EB82872A0CD315006DD9D2 /* SystemSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92EB82862A0CD315006DD9D2 /* SystemSettingsView.swift */; };
 		92F78D4D2A0A7B2E00999BD0 /* TaskTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F78D4C2A0A7B2E00999BD0 /* TaskTimerView.swift */; };
 		92F78D4F2A0B361C00999BD0 /* TaskTimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92F78D4E2A0B361C00999BD0 /* TaskTimerManager.swift */; };
+		9BF8E46C2DCA6F6D00F8DC64 /* CopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */; };
+		9BF8E46D2DCA6F6D00F8DC64 /* RegularCopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */; };
+		9BFFE6F32DCA60A200699B2A /* CopilotListConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -212,6 +215,9 @@
 		92EB82862A0CD315006DD9D2 /* SystemSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSettingsView.swift; sourceTree = "<group>"; };
 		92F78D4C2A0A7B2E00999BD0 /* TaskTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTimerView.swift; sourceTree = "<group>"; };
 		92F78D4E2A0B361C00999BD0 /* TaskTimerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTimerManager.swift; sourceTree = "<group>"; };
+		9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotList.swift; sourceTree = "<group>"; };
+		9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegularCopilotList.swift; sourceTree = "<group>"; };
+		9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotListConfiguration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -257,6 +263,7 @@
 				83264A3429EBEE8D0074E33A /* AwardConfiguration.swift */,
 				8341194F29EC249E00044F45 /* RoguelikeConfiguration.swift */,
 				8341195429EC55C600044F45 /* CopilotConfiguration.swift */,
+				9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */,
 				832985AF29EEF483009F7ED5 /* ReclamationConfiguration.swift */,
 				83782A2A2CFFAF2900A32BDD /* LegacyConfigurations.swift */,
 			);
@@ -319,14 +326,16 @@
 		832985B729EF98D0009F7ED5 /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
-				8355E7AD29E7F9DD005D5A1C /* ContentView.swift */,
 				8355E7B729E9E2B2005D5A1C /* Sidebar.swift */,
 				832985B829EF9D50009F7ED5 /* MAAContent.swift */,
 				832985BC29EFA43B009F7ED5 /* MAADetail.swift */,
+				8355E7AD29E7F9DD005D5A1C /* ContentView.swift */,
 				8355E7B329E918A2005D5A1C /* TasksContent.swift */,
-				8341195C29EC719B00044F45 /* CopilotContent.swift */,
 				832985AD29EEE672009F7ED5 /* UtilityContent.swift */,
 				832985BA29EFA26D009F7ED5 /* TaskDetail.swift */,
+				8341195C29EC719B00044F45 /* CopilotContent.swift */,
+				9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */,
+				9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */,
 				8329858929ED121A009F7ED5 /* CopilotDetail.swift */,
 				832985C029EFB665009F7ED5 /* UtilityDetail.swift */,
 			);
@@ -579,6 +588,8 @@
 				8355E7AE29E7F9DD005D5A1C /* ContentView.swift in Sources */,
 				8355E7B029E8722E005D5A1C /* TaskCell.swift in Sources */,
 				8334777A28F3A14A00499D0A /* ConnectionSettingsView.swift in Sources */,
+				9BF8E46C2DCA6F6D00F8DC64 /* CopilotList.swift in Sources */,
+				9BF8E46D2DCA6F6D00F8DC64 /* RegularCopilotList.swift in Sources */,
 				92F78D4F2A0B361C00999BD0 /* TaskTimerManager.swift in Sources */,
 				83DD50B729BE393C000E84E7 /* UpdaterSettingsView.swift in Sources */,
 				92CDF6222A065E55005669EC /* Codeable+JSON.swift in Sources */,
@@ -599,6 +610,7 @@
 				83D3283928F3048E00018D10 /* RoguelikeSettingsView.swift in Sources */,
 				92EB82872A0CD315006DD9D2 /* SystemSettingsView.swift in Sources */,
 				8315B0BD290E48F300AE7FDC /* StartupSettingsView.swift in Sources */,
+				9BFFE6F32DCA60A200699B2A /* CopilotListConfiguration.swift in Sources */,
 				83264A3529EBEE8D0074E33A /* AwardConfiguration.swift in Sources */,
 				832985BD29EFA43B009F7ED5 /* MAADetail.swift in Sources */,
 				83264A2D29EBEDD80074E33A /* FightConfiguration.swift in Sources */,
@@ -713,6 +725,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hguandl.MeoAsstMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -801,6 +814,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hguandl.MeoAsstMac;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "MAA CI Workflow";
