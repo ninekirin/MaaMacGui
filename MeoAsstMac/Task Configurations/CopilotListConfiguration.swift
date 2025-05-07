@@ -12,6 +12,8 @@ struct CopilotItemConfiguration: Codable {
     var filename: String
     var name: String
     var is_raid: Bool = false
+    var need_navigate = true
+    var navigate_name: String?
 }
 
 struct CopilotListConfiguration: Codable {
