@@ -1024,6 +1024,9 @@
         }
       }
     },
+    "No more tasks to run" : {
+
+    },
     "No uncompleted tasks" : {
 
     },
@@ -1390,6 +1393,9 @@
         }
       }
     },
+    "Starting Copilot List" : {
+
+    },
     "StartTask %@" : {
       "localizations" : {
         "ko" : {
@@ -1437,9 +1443,6 @@
           }
         }
       }
-    },
-    "Task started" : {
-
     },
     "TaskError %@" : {
       "localizations" : {

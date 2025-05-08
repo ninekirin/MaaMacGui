@@ -90,14 +90,7 @@ struct CopilotContent: View {
     }
     
     private func deleteCopilot(url: URL) {
-        let bundledPath = Bundle.main.resourceURL!
-            .appendingPathComponent("resource")
-            .appendingPathComponent("copilot")
-            .path
-            
-        if !url.path.starts(with: bundledPath) {
-            try? FileManager.default.removeItem(at: url)
-        }
+        try? FileManager.default.removeItem(at: url)
     }
     
     // MARK: - Helpers

@@ -248,14 +248,7 @@ import SwiftUI
         NotificationCenter.default
             .publisher(for: .MAAReceivedCallbackMessage)
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] notification in
-                // Always process message for core functionality
-                self?.processMessage(notification)
-                // Additionally process copilot list messages if enabled
-                if self?.useCopilotList == true {
-                    self?.processCopilotListMessage(notification)
-                }
-            })
+            .sink(receiveValue: processMessage)
             .store(in: &cancellables)
 
         initScheduledDailyTaskTimer()
@@ -534,6 +527,8 @@ extension MAAViewModel {
         defer { handleEarlyReturn(backTo: .idle) }
 
         if useCopilotList {
+            logTrace("Starting Copilot List")
+
             try await ensureHandle()
 
             // Find first uncompleted enabled item
@@ -665,6 +660,8 @@ extension MAAViewModel {
                     status = .idle
                 }
                 return
+            } else {
+                logTrace("No more tasks to run")
             }
         }
 
@@ -672,33 +669,6 @@ extension MAAViewModel {
         currentCopilotIndex = nil
         currentTaskId = nil
         status = .idle
-    }
-
-    func processCopilotListMessage(_ notification: Notification) {
-        if let json = notification.object as? [String: Any],
-           let type = json["type"] as? String {
-            switch type {
-            case "TaskChainStart":
-                logTrace("Task started")
-            case "AllTaskCompleted", "TaskChainError":
-                handleTaskCallback(json)
-            default:
-                break
-            }
-        }
-    }
-
-    func handleTaskCallback(_ message: [String: Any]) {
-        guard let type = message["type"] as? String,
-            let taskId = message["taskId"] as? Int32,
-            taskId == currentTaskId
-        else { return }
-
-        if type == "AllTaskCompleted" || type == "TaskFailed" {
-            let success = type == "AllTaskCompleted" && ((message["success"] as? Bool) ?? false)
-            handleCopilotTaskCompletion(success: success)
-            status = .idle
-        }
     }
 
     func addToCopilotList(copilot: MAACopilot, url: URL, copilot_id: Int = 0) {
@@ -737,19 +707,6 @@ extension MAAViewModel {
     }
 
     func moveCopilotItem(from source: Int, to destination: Int) {
-        // REMOVEME: 这段代码是为了测试拖拽排序的功能
-
-        // guard !copilotListConfig.items.isEmpty,
-        //       source >= 0, source < copilotListConfig.items.count,
-        //       destination >= 0, destination <= copilotListConfig.items.count else {
-        //     return
-        // }
-        // let item = copilotListConfig.items.remove(at: source)
-        // copilotListConfig.items.insert(item, at: destination)
-
-        // 草原来 Swift 有内置的 move 方法啊，爽到
-
-        // use Swift's built-in move method
         copilotListConfig.items.move(fromOffsets: IndexSet(integer: source), toOffset: destination)
     }
 }
