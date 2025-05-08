@@ -124,8 +124,6 @@ import SwiftUI
             if let data = try? JSONEncoder().encode(copilotListConfig),
                 let string = String(data: data, encoding: .utf8)
             {
-                // Reorder items to maintain correct indices
-                copilotListConfig.reorderItems()
                 savedCopilotListConfig = string
             }
             updatingCopilotListConfig = false
@@ -518,39 +516,40 @@ extension MAAViewModel {
 
             try await ensureHandle()
 
-            // Find first uncompleted enabled item
-            guard let index = copilotListConfig.items.firstIndex(where: { $0.enabled }) else {
-                logTrace("No uncompleted tasks")
-                return
+            for (index, item) in copilotListConfig.items.enumerated() where item.enabled {
+                currentCopilotIndex = index
+
+                let config = RegularCopilotConfiguration(
+                    filename: item.filename,
+                    formation: copilotListConfig.formation,
+                    add_trust: copilotListConfig.add_trust,
+                    is_raid: item.is_raid,
+                    use_sanity_potion: copilotListConfig.use_sanity_potion,
+                    need_navigate: item.need_navigate,
+                    navigate_name: item.navigate_name
+                )
+
+                let copilot = CopilotConfiguration.regular(config)
+
+                guard let params = copilot.params else {
+                    continue
+                }
+
+                currentCopilotStatus = .running
+
+                if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
+                    currentTaskId = taskId
+                }
             }
 
-            currentCopilotIndex = index
-            let item = copilotListConfig.items[index]
-
-            // Create RegularCopilotConfiguration
-            let config = RegularCopilotConfiguration(
-                filename: item.filename,
-                formation: copilotListConfig.formation,
-                add_trust: copilotListConfig.add_trust,
-                is_raid: item.is_raid,
-                use_sanity_potion: copilotListConfig.use_sanity_potion,
-                need_navigate: item.need_navigate,
-                navigate_name: item.navigate_name
-            )
-
-            let copilot = CopilotConfiguration.regular(config)
-
-            guard let params = copilot.params else {
+            guard currentTaskId != nil else {
+                logTrace("No enabled tasks")
                 currentCopilotIndex = nil
                 return
             }
 
-            currentCopilotStatus = .running
+            try await handle?.start()
 
-            if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
-                currentTaskId = taskId
-                try await handle?.start()
-            }
         } else {
             guard let copilot,
                 let params = copilot.params

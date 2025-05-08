@@ -19,12 +19,6 @@ struct CopilotListConfiguration: Codable {
         case add_trust 
         case use_sanity_potion
     }
-    
-    mutating func reorderItems() {
-        for (index, _) in items.enumerated() {
-            items[index].index = index
-        }
-    }
 }
 
 extension CopilotListConfiguration {

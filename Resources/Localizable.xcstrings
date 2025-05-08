@@ -489,9 +489,6 @@
         }
       }
     },
-    "Failed to start next task: %@" : {
-
-    },
     "FailedToOpenClient" : {
       "localizations" : {
         "ko" : {
@@ -1024,10 +1021,7 @@
         }
       }
     },
-    "No more tasks to run" : {
-
-    },
-    "No uncompleted tasks" : {
+    "No enabled tasks" : {
 
     },
     "NoDrop" : {
