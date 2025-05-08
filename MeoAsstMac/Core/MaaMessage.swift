@@ -139,11 +139,20 @@ extension MAAViewModel {
             logError("TaskError \(taskChain)")
             if isCopilot {
                 logError("CombatError")
+                if useCopilotList {
+                    handleCopilotTaskCompletion(success: false)
+                }
             }
 
         case .TaskChainStart:
             if let id = taskID(taskDetails: message.details) {
                 taskStatus[id] = .running
+                // Update currentTaskId for tracking
+                if isCopilot && useCopilotList {
+                    if let coreId = message.details["taskid"].int32 {
+                        currentTaskId = coreId
+                    }
+                }
             }
             logTrace("StartTask \(taskChain)")
 
@@ -173,6 +182,9 @@ extension MAAViewModel {
 
             if isCopilot {
                 logInfo("CompleteCombat")
+                if useCopilotList {
+                    handleCopilotTaskCompletion(success: true)
+                }
             }
 
         case .TaskChainExtraInfo:

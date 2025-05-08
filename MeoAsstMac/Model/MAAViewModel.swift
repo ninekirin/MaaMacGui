@@ -91,8 +91,8 @@ import SwiftUI
         case running
     }
 
-    private var currentCopilotIndex: Int?
-    private var currentTaskId: Int32?
+    @Published var currentCopilotIndex: Int?
+    @Published var currentTaskId: Int32?
     @Published var currentCopilotStatus: CopilotTaskStatus?
 
     @Published var copilot: CopilotConfiguration?
@@ -675,38 +675,15 @@ extension MAAViewModel {
     }
 
     func processCopilotListMessage(_ notification: Notification) {
-        if let message = notification.object as? MaaMessage {
-            // Handle MaaMessage type
-            switch message.code {
-            case .TaskChainStart:
+        if let json = notification.object as? [String: Any],
+           let type = json["type"] as? String {
+            switch type {
+            case "TaskChainStart":
                 logTrace("Task started")
-                if let taskId = taskID(taskDetails: message.details) {
-                    currentTaskId = Int32(taskId.hashValue)
-                }
-            case .TaskChainCompleted:
-                if let taskId = taskID(taskDetails: message.details) {
-                    handleCopilotTaskCompletion(success: true)
-                }
-            case .TaskChainError:
-                if let taskId = taskID(taskDetails: message.details) {
-                    handleCopilotTaskCompletion(success: false)
-                }
+            case "AllTaskCompleted", "TaskChainError":
+                handleTaskCallback(json)
             default:
                 break
-            }
-        } else if let json = notification.object as? [String: Any] {
-            // Handle JSON type
-            if let type = json["type"] as? String {
-                switch type {
-                case "TaskChainStart":
-                    logTrace("Task started")
-                case "AllTaskCompleted":
-                    handleTaskCallback(json)
-                case "TaskChainError":
-                    handleTaskCallback(json)
-                default:
-                    break
-                }
             }
         }
     }
