@@ -66,20 +66,6 @@ struct CopilotList: View {
         }
         .animation(.default, value: viewModel.copilotListConfig.items.count)
     }
-
-    private struct CopilotListSettings: View {
-        @EnvironmentObject private var viewModel: MAAViewModel
-
-        var body: some View {
-            Form {
-                Section("全局设置") {
-                    Toggle("自动编队", isOn: $viewModel.copilotListConfig.formation)
-                    Toggle("信赖干员", isOn: $viewModel.copilotListConfig.add_trust)
-                    Toggle("允许使用理智药", isOn: $viewModel.copilotListConfig.use_sanity_potion)
-                }
-            }
-        }
-    }
 }
 
 #Preview {
