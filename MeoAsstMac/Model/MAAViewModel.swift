@@ -248,7 +248,14 @@ import SwiftUI
         NotificationCenter.default
             .publisher(for: .MAAReceivedCallbackMessage)
             .receive(on: RunLoop.main)
-            .sink(receiveValue: processMessage)
+            .sink(receiveValue: { [weak self] notification in
+                // Always process message for core functionality
+                self?.processMessage(notification)
+                // Additionally process copilot list messages if enabled
+                if self?.useCopilotList == true {
+                    self?.processCopilotListMessage(notification)
+                }
+            })
             .store(in: &cancellables)
 
         initScheduledDailyTaskTimer()
@@ -609,26 +616,97 @@ extension MAAViewModel {
             if item.copilot_id > 0 {
                 completedCopilotIds.insert(item.copilot_id)
             }
+
+            // Find next enabled task
+            if let nextIndex = copilotListConfig.items.dropFirst(index + 1).firstIndex(where: { $0.enabled }) {
+                // Start next task
+                currentCopilotIndex = nextIndex
+                let nextItem = copilotListConfig.items[nextIndex]
+
+                Task {
+                    do {
+                        // Create RegularCopilotConfiguration for next task
+                        let config = RegularCopilotConfiguration(
+                            filename: nextItem.filename,
+                            formation: copilotListConfig.formation,
+                            add_trust: copilotListConfig.add_trust,
+                            is_raid: nextItem.is_raid,
+                            use_sanity_potion: copilotListConfig.use_sanity_potion,
+                            need_navigate: nextItem.need_navigate,
+                            navigate_name: nextItem.navigate_name
+                        )
+
+                        // Create CopilotConfiguration enum case
+                        let copilot = CopilotConfiguration.regular(config)
+
+                        // Get params string
+                        guard let params = copilot.params else {
+                            currentCopilotIndex = nil
+                            currentTaskId = nil
+                            return
+                        }
+
+                        currentCopilotStatus = .running
+
+                        // Start next task
+                        if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
+                            currentTaskId = taskId
+                            try await handle?.start()
+                            status = .busy
+                            return
+                        }
+                    } catch {
+                        logError("Failed to start next task: \(error.localizedDescription)")
+                    }
+                    
+                    // Reset tracking state if task start fails
+                    currentCopilotIndex = nil
+                    currentTaskId = nil
+                    status = .idle
+                }
+                return
+            }
         }
 
-        // Reset tracking state
+        // Reset tracking state if no next task or current task failed
         currentCopilotIndex = nil
         currentTaskId = nil
+        status = .idle
     }
 
     func processCopilotListMessage(_ notification: Notification) {
-        guard let json = notification.object as? [String: Any] else { return }
-
-        if let type = json["type"] as? String {
-            switch type {
-            case "TaskChainStart":
+        if let message = notification.object as? MaaMessage {
+            // Handle MaaMessage type
+            switch message.code {
+            case .TaskChainStart:
                 logTrace("Task started")
-            case "AllTaskCompleted":
-                handleTaskCallback(json)
-            case "TaskChainError":
-                handleTaskCallback(json)
+                if let taskId = taskID(taskDetails: message.details) {
+                    currentTaskId = Int32(taskId.hashValue)
+                }
+            case .TaskChainCompleted:
+                if let taskId = taskID(taskDetails: message.details) {
+                    handleCopilotTaskCompletion(success: true)
+                }
+            case .TaskChainError:
+                if let taskId = taskID(taskDetails: message.details) {
+                    handleCopilotTaskCompletion(success: false)
+                }
             default:
                 break
+            }
+        } else if let json = notification.object as? [String: Any] {
+            // Handle JSON type
+            if let type = json["type"] as? String {
+                switch type {
+                case "TaskChainStart":
+                    logTrace("Task started")
+                case "AllTaskCompleted":
+                    handleTaskCallback(json)
+                case "TaskChainError":
+                    handleTaskCallback(json)
+                default:
+                    break
+                }
             }
         }
     }
