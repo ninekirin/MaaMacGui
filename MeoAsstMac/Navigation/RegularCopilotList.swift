@@ -17,6 +17,13 @@ struct RegularCopilotList: View {
 
     var onDeleteCopilot: (URL) -> Void
 
+    func handleDelete(url: URL) {
+        if !url.path.starts(with: bundledDirectory.path) {
+            copilots.remove(url)
+            onDeleteCopilot(url)
+        }
+    }
+
     private var bundledCopilots: [URL] { bundledDirectory.copilots }
 
     var body: some View {
@@ -42,6 +49,15 @@ struct RegularCopilotList: View {
             Section {
                 ForEach(copilots.urls, id: \.self) { url in
                     Text(url.lastPathComponent)
+                        .contextMenu {
+                            if !url.path.starts(with: bundledDirectory.path) {
+                                Button(role: .destructive) {
+                                    handleDelete(url: url)
+                                } label: {
+                                    Label("移除", systemImage: "trash")
+                                }
+                            }
+                        }
                 }
             } header: {
                 HStack {

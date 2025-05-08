@@ -15,10 +15,12 @@ struct CopilotDetail: View {
 
     var body: some View {
         VStack {
-            if viewModel.useCopilotList && viewModel.status == .idle {
-                CopilotListSettings()
-            } else if let url {
-                CopilotView(url: url)
+            if viewModel.status == .idle {
+                if viewModel.useCopilotList {
+                    CopilotListSettings()
+                } else if let url {
+                    CopilotView(url: url)
+                }
             } else {
                 LogView()
             }
