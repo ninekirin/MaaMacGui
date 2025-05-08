@@ -7,7 +7,6 @@ struct CopilotItemConfiguration: Codable {
     var is_raid: Bool
     var need_navigate: Bool
     var navigate_name: String
-    var copilot_id: Int
 
     enum CodingKeys: String, CodingKey {
         case enabled
@@ -16,6 +15,5 @@ struct CopilotItemConfiguration: Codable {
         case is_raid
         case need_navigate
         case navigate_name
-        case copilot_id
     }
 }

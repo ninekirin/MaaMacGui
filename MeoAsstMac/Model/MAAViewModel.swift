@@ -112,12 +112,6 @@ import SwiftUI
                 let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data)
             {
                 copilotListConfig = config
-                // 加载已完成的作业ID
-                for item in config.items {
-                    if item.copilot_id > 0 {
-                        completedCopilotIds.insert(item.copilot_id)
-                    }
-                }
             }
             updatingCopilotListConfig = false
         }
@@ -130,20 +124,13 @@ import SwiftUI
             if let data = try? JSONEncoder().encode(copilotListConfig),
                 let string = String(data: data, encoding: .utf8)
             {
+                // Reorder items to maintain correct indices
+                copilotListConfig.reorderItems()
                 savedCopilotListConfig = string
-                // 保存任务状态
-                for item in copilotListConfig.items {
-                    if item.copilot_id > 0 && !item.enabled {
-                        completedCopilotIds.insert(item.copilot_id)
-                    }
-                }
             }
             updatingCopilotListConfig = false
         }
     }
-
-    // 记录已点赞的作业ID
-    private var completedCopilotIds = Set<Int>()
 
     // MARK: - Recognition
 
@@ -551,10 +538,8 @@ extension MAAViewModel {
                 navigate_name: item.navigate_name
             )
 
-            // Create CopilotConfiguration enum case
             let copilot = CopilotConfiguration.regular(config)
 
-            // Get params string
             guard let params = copilot.params else {
                 currentCopilotIndex = nil
                 return
@@ -562,7 +547,6 @@ extension MAAViewModel {
 
             currentCopilotStatus = .running
 
-            // Start task and store task ID
             if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
                 currentTaskId = taskId
                 try await handle?.start()
@@ -595,83 +579,7 @@ extension MAAViewModel {
         status = .busy
     }
 
-    func handleCopilotTaskCompletion(success: Bool) {
-        guard let index = currentCopilotIndex else { return }
-
-        // Update status
-        currentCopilotStatus = success ? .success : .failure
-
-        // Update completion state
-        if success {
-            var item = copilotListConfig.items[index]
-            item.enabled = false
-            copilotListConfig.items[index] = item
-
-            // Add to completedCopilotIds
-            if item.copilot_id > 0 {
-                completedCopilotIds.insert(item.copilot_id)
-            }
-
-            // Find next enabled task
-            if let nextIndex = copilotListConfig.items.dropFirst(index + 1).firstIndex(where: { $0.enabled }) {
-                // Start next task
-                currentCopilotIndex = nextIndex
-                let nextItem = copilotListConfig.items[nextIndex]
-
-                Task {
-                    do {
-                        // Create RegularCopilotConfiguration for next task
-                        let config = RegularCopilotConfiguration(
-                            filename: nextItem.filename,
-                            formation: copilotListConfig.formation,
-                            add_trust: copilotListConfig.add_trust,
-                            is_raid: nextItem.is_raid,
-                            use_sanity_potion: copilotListConfig.use_sanity_potion,
-                            need_navigate: nextItem.need_navigate,
-                            navigate_name: nextItem.navigate_name
-                        )
-
-                        // Create CopilotConfiguration enum case
-                        let copilot = CopilotConfiguration.regular(config)
-
-                        // Get params string
-                        guard let params = copilot.params else {
-                            currentCopilotIndex = nil
-                            currentTaskId = nil
-                            return
-                        }
-
-                        currentCopilotStatus = .running
-
-                        // Start next task
-                        if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
-                            currentTaskId = taskId
-                            try await handle?.start()
-                            status = .busy
-                            return
-                        }
-                    } catch {
-                        logError("Failed to start next task: \(error.localizedDescription)")
-                    }
-                    
-                    // Reset tracking state if task start fails
-                    currentCopilotIndex = nil
-                    currentTaskId = nil
-                    status = .idle
-                }
-                return
-            } else {
-                logTrace("No more tasks to run")
-            }
-        }
-
-        // Reset tracking state if no next task or current task failed
-        currentCopilotIndex = nil
-        currentTaskId = nil
-        status = .idle
-    }
-
-    func addToCopilotList(copilot: MAACopilot, url: URL, copilot_id: Int = 0) {
+    func addToCopilotList(copilot: MAACopilot, url: URL) {
         let name = copilot.doc?.title ?? url.lastPathComponent
         let is_raid = copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue
 
@@ -691,13 +599,12 @@ extension MAAViewModel {
         }
 
         let item = CopilotItemConfiguration(
-            enabled: !completedCopilotIds.contains(copilot_id),
+            enabled: true,
             filename: url.path,
             name: name,
             is_raid: is_raid,
             need_navigate: true,
             navigate_name: navigate_name,
-            copilot_id: copilot_id
         )
         copilotListConfig.items.append(item)
     }
