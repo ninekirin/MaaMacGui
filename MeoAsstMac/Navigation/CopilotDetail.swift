@@ -29,7 +29,7 @@ struct CopilotDetail: View {
 
     private struct CopilotListSettings: View {
         @EnvironmentObject private var viewModel: MAAViewModel
-        
+
         var body: some View {
             Form {
                 Section("全局设置") {
@@ -45,7 +45,7 @@ struct CopilotDetail: View {
 
     @ToolbarContentBuilder private func detailToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
-            if !viewModel.useCopilotList { // 只在非战斗列表模式显示
+            if !viewModel.useCopilotList {  // 只在非战斗列表模式显示
                 Button {
                     showAdd = true
                 } label: {

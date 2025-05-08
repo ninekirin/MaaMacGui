@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CopilotList: View {
     @EnvironmentObject private var viewModel: MAAViewModel
-    
+
     var body: some View {
         List {
             Section("战斗列表（自动模式）") {
@@ -17,33 +17,40 @@ struct CopilotList: View {
                 // REMOVEME: \.1.name 使用每个元素的 item.name 作为唯一标识
                 ForEach(Array(viewModel.copilotListConfig.items.enumerated()), id: \.0) { index, item in
                     HStack {
-                        Toggle("", isOn: .init(
-                            get: { item.enabled },
-                            set: { viewModel.copilotListConfig.items[index].enabled = $0 }
-                        ))
+                        Toggle(
+                            "",
+                            isOn: .init(
+                                get: { item.enabled },
+                                set: { viewModel.copilotListConfig.items[index].enabled = $0 }
+                            )
+                        )
                         .labelsHidden()
-                        
+
                         Text(item.name)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        
+
                         if item.is_raid {
                             Text("突袭")
                                 .foregroundStyle(.secondary)
                         }
-                        
+
                         Menu {
                             Button(action: {
                                 var newItem = item
                                 newItem.is_raid.toggle()
                                 viewModel.copilotListConfig.items[index] = newItem
                             }) {
-                                Label(item.is_raid ? "普通模式" : "突袭模式", 
-                                      systemImage: item.is_raid ? "shield.slash" : "shield.fill")
+                                Label(
+                                    item.is_raid ? "普通模式" : "突袭模式",
+                                    systemImage: item.is_raid ? "shield.slash" : "shield.fill")
                             }
-                            
-                            Button(role: .destructive, action: {
-                                viewModel.removeFromCopilotList(at: index)
-                            }) {
+
+                            Button(
+                                role: .destructive,
+                                action: {
+                                    viewModel.removeFromCopilotList(at: index)
+                                }
+                            ) {
                                 Label("删除", systemImage: "trash")
                             }
                         } label: {
@@ -59,10 +66,10 @@ struct CopilotList: View {
         }
         .animation(.default, value: viewModel.copilotListConfig.items.count)
     }
-    
+
     private struct CopilotListSettings: View {
         @EnvironmentObject private var viewModel: MAAViewModel
-        
+
         var body: some View {
             Form {
                 Section("全局设置") {

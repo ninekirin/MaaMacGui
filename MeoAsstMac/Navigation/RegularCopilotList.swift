@@ -5,21 +5,20 @@
 //  Created by ninekirin on 2025/5/6.
 //
 
-
 import SwiftUI
 
 struct RegularCopilotList: View {
     @EnvironmentObject private var viewModel: MAAViewModel
     @Binding var selection: URL?
-    
+
     @State private var copilots = Set<URL>()
     @State private var downloading = false
     @State private var expanded = false
-    
+
     var onDeleteCopilot: (URL) -> Void
-    
+
     private var bundledCopilots: [URL] { bundledDirectory.copilots }
-    
+
     var body: some View {
         List(selection: $selection) {
             DisclosureGroup(isExpanded: $expanded) {
@@ -67,14 +66,14 @@ struct RegularCopilotList: View {
             allowsMultipleSelection: true,
             onCompletion: addCopilots)
     }
-    
+
     // MARK: - Actions
-    
+
     private func loadUserCopilots() {
         copilots.formUnion(externalDirectory.copilots)
         copilots.formUnion(recordingDirectory.copilots)
     }
-    
+
     private func addCopilots(_ providers: [NSItemProvider]) -> Bool {
         Task {
             for provider in providers {
@@ -136,9 +135,9 @@ struct RegularCopilotList: View {
             selection = copilots.urls.last
         }
     }
-    
+
     // MARK: - File Paths
-    
+
     private var bundledDirectory: URL {
         Bundle.main.resourceURL!
             .appendingPathComponent("resource")
@@ -170,8 +169,8 @@ struct RegularCopilotList: View {
 
 // MARK: - Value Extensions
 
-private extension URL {
-    var copilots: [URL] {
+extension URL {
+    fileprivate var copilots: [URL] {
         guard
             let urls = try? FileManager.default.contentsOfDirectory(
                 at: self,
@@ -189,8 +188,8 @@ private extension URL {
     }
 }
 
-private extension Set where Element == URL {
-    var urls: [URL] { sorted { $0.lastPathComponent < $1.lastPathComponent } }
+extension Set where Element == URL {
+    fileprivate var urls: [URL] { sorted { $0.lastPathComponent < $1.lastPathComponent } }
 }
 
 private struct CopilotResponse: Codable {
@@ -201,8 +200,8 @@ private struct CopilotResponse: Codable {
     }
 }
 
-private extension NSItemProvider {
-    @MainActor func loadURL() async throws -> URL {
+extension NSItemProvider {
+    @MainActor fileprivate func loadURL() async throws -> URL {
         let handle = ProgressActor()
 
         return try await withTaskCancellationHandler {

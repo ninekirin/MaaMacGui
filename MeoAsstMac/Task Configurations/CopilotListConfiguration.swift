@@ -17,15 +17,11 @@ struct CopilotItemConfiguration: Codable {
 }
 
 struct CopilotListConfiguration: Codable {
-    var enabled: Bool = true 
+    var enabled: Bool = true
     var items: [CopilotItemConfiguration] = []
     var formation: Bool = false
     var add_trust: Bool = false
     var use_sanity_potion: Bool = false
-    
-    var params: String? {
-        try? jsonString()
-    }
 }
 
 // Extension to allow encoding to JSON string

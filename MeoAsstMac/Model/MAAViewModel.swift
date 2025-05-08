@@ -325,7 +325,7 @@ extension MAAViewModel {
     private func loadResource(channel: MAAClientChannel) async throws {
         // Initialize map data
         MapHelper.loadMapData()
-        
+
         let (preferUser, currentResourceVersion) = try resourceChannel.version()
         try await loadResource(url: Bundle.main.resourceURL!, channel: channel)
 
@@ -506,25 +506,35 @@ extension MAAViewModel {
         defer { handleEarlyReturn(backTo: .idle) }
 
         if useCopilotList {
-            guard let params = copilotListConfig.params else { return }
-
             try await ensureHandle()
 
             // Handle each enabled copilot item sequentially
             for item in copilotListConfig.items where item.enabled {
+                // Create RegularCopilotConfiguration
+                let config = RegularCopilotConfiguration(
+                    filename: item.filename,
+                    formation: copilotListConfig.formation,
+                    add_trust: copilotListConfig.add_trust,
+                    is_raid: item.is_raid,
+                    use_sanity_potion: copilotListConfig.use_sanity_potion,
+                    need_navigate: item.need_navigate,
+                    navigate_name: item.navigate_name
+                )
 
-                if let itemJson = try? item.jsonString() {
-                    logTrace(
-                    """
-                    CopilotListItem JSON:
-                    \(itemJson)
-                    """
-                    )
+                // Create CopilotConfiguration enum case
+                let copilot = CopilotConfiguration.regular(config)
+
+                // Get params string
+                guard let params = copilot.params else {
+                    continue
                 }
 
-                _ = try await handle?.appendTask(type: .Copilot, params: item.jsonString())
+                // Debug: print params
+                logTrace("params: \(params)")
 
-                // Start after appending each task 
+                _ = try await handle?.appendTask(type: .Copilot, params: params)
+
+                // Start after appending each task
                 try await handle?.start()
             }
         } else {
@@ -559,20 +569,21 @@ extension MAAViewModel {
             logError("关卡名不能为空")
             return
         }
-        
-        // Get navigation map name 
+
+        // Get navigation map name
         guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
             logError("Map '\(stage_name)' not found, resource update may be needed")
             // Show resource update dialog
             showResourceUpdate = true
             return
         }
-        
-        let item = CopilotItemConfiguration(filename: url.path, 
-                                          name: name, 
-                                          is_raid: is_raid,
-                                          need_navigate: true,
-                                          navigate_name: navigate_name)
+
+        let item = CopilotItemConfiguration(
+            filename: url.path,
+            name: name,
+            is_raid: is_raid,
+            need_navigate: true,
+            navigate_name: navigate_name)
         copilotListConfig.items.append(item)
     }
 
