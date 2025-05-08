@@ -8,7 +8,6 @@ struct CopilotItemConfiguration: Codable {
     var need_navigate: Bool
     var navigate_name: String
     var copilot_id: Int
-    var is_completed: Bool
 
     enum CodingKeys: String, CodingKey {
         case enabled
@@ -18,6 +17,5 @@ struct CopilotItemConfiguration: Codable {
         case need_navigate
         case navigate_name
         case copilot_id
-        case is_completed
     }
 }

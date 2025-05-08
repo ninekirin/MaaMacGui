@@ -133,7 +133,7 @@ import SwiftUI
                 savedCopilotListConfig = string
                 // 保存任务状态
                 for item in copilotListConfig.items {
-                    if item.copilot_id > 0 && item.is_completed {
+                    if item.copilot_id > 0 && !item.enabled {
                         completedCopilotIds.insert(item.copilot_id)
                     }
                 }
@@ -530,7 +530,7 @@ extension MAAViewModel {
             try await ensureHandle()
 
             // Find first uncompleted enabled item
-            guard let index = copilotListConfig.items.firstIndex(where: { $0.enabled && !$0.is_completed }) else {
+            guard let index = copilotListConfig.items.firstIndex(where: { $0.enabled }) else {
                 logTrace("No uncompleted tasks")
                 return
             }
@@ -602,7 +602,7 @@ extension MAAViewModel {
         // Update completion state
         if success {
             var item = copilotListConfig.items[index]
-            item.is_completed = true
+            item.enabled = false
             copilotListConfig.items[index] = item
 
             // Add to completedCopilotIds
@@ -666,13 +666,13 @@ extension MAAViewModel {
         }
 
         let item = CopilotItemConfiguration(
+            enabled: !completedCopilotIds.contains(copilot_id),
             filename: url.path,
             name: name,
             is_raid: is_raid,
             need_navigate: true,
             navigate_name: navigate_name,
-            copilot_id: copilot_id,
-            is_completed: completedCopilotIds.contains(copilot_id)
+            copilot_id: copilot_id
         )
         copilotListConfig.items.append(item)
     }
