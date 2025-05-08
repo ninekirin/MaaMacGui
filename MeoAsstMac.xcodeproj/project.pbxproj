@@ -97,6 +97,7 @@
 		9BF8E46C2DCA6F6D00F8DC64 /* CopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */; };
 		9BF8E46D2DCA6F6D00F8DC64 /* RegularCopilotList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */; };
 		9BF8E4752DCBCF1C00F8DC64 /* MapHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E4742DCBCF1C00F8DC64 /* MapHelper.swift */; };
+		9BF8E4772DCC937200F8DC64 /* CopilotItemConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF8E4762DCC937200F8DC64 /* CopilotItemConfiguration.swift */; };
 		9BFFE6F32DCA60A200699B2A /* CopilotListConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */; };
 /* End PBXBuildFile section */
 
@@ -219,6 +220,7 @@
 		9BF8E46A2DCA6F6D00F8DC64 /* CopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotList.swift; sourceTree = "<group>"; };
 		9BF8E46B2DCA6F6D00F8DC64 /* RegularCopilotList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegularCopilotList.swift; sourceTree = "<group>"; };
 		9BF8E4742DCBCF1C00F8DC64 /* MapHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapHelper.swift; sourceTree = "<group>"; };
+		9BF8E4762DCC937200F8DC64 /* CopilotItemConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotItemConfiguration.swift; sourceTree = "<group>"; };
 		9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopilotListConfiguration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -265,6 +267,7 @@
 				83264A3429EBEE8D0074E33A /* AwardConfiguration.swift */,
 				8341194F29EC249E00044F45 /* RoguelikeConfiguration.swift */,
 				8341195429EC55C600044F45 /* CopilotConfiguration.swift */,
+				9BF8E4762DCC937200F8DC64 /* CopilotItemConfiguration.swift */,
 				9BFFE6F22DCA60A200699B2A /* CopilotListConfiguration.swift */,
 				832985AF29EEF483009F7ED5 /* ReclamationConfiguration.swift */,
 				83782A2A2CFFAF2900A32BDD /* LegacyConfigurations.swift */,
@@ -610,6 +613,7 @@
 				832985B429EF1219009F7ED5 /* MAARecruit.swift in Sources */,
 				83264A2629EBC9C10074E33A /* ReclamationSettingsView.swift in Sources */,
 				832985B629EF1890009F7ED5 /* MAADepot.swift in Sources */,
+				9BF8E4772DCC937200F8DC64 /* CopilotItemConfiguration.swift in Sources */,
 				83D3283928F3048E00018D10 /* RoguelikeSettingsView.swift in Sources */,
 				92EB82872A0CD315006DD9D2 /* SystemSettingsView.swift in Sources */,
 				8315B0BD290E48F300AE7FDC /* StartupSettingsView.swift in Sources */,
