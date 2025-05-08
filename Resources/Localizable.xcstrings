@@ -367,9 +367,6 @@
         }
       }
     },
-    "CopilotListItem JSON:\n%@" : {
-
-    },
     "CurrentStage %@" : {
       "localizations" : {
         "ko" : {
@@ -1055,6 +1052,9 @@
           }
         }
       }
+    },
+    "params: %@" : {
+
     },
     "PlayCover 链接…" : {
       "localizations" : {
