@@ -139,9 +139,6 @@ extension MAAViewModel {
             logError("TaskError \(taskChain)")
             if isCopilot {
                 logError("CombatError")
-                if useCopilotList {
-                    handleCopilotTaskCompletion(success: false)
-                }
             }
 
         case .TaskChainStart:
@@ -182,9 +179,6 @@ extension MAAViewModel {
 
             if isCopilot {
                 logInfo("CompleteCombat")
-                if useCopilotList {
-                    handleCopilotTaskCompletion(success: true)
-                }
             }
 
         case .TaskChainExtraInfo:
