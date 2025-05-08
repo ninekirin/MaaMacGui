@@ -1021,6 +1021,9 @@
         }
       }
     },
+    "No uncompleted tasks" : {
+
+    },
     "NoDrop" : {
       "localizations" : {
         "ko" : {
@@ -1052,9 +1055,6 @@
           }
         }
       }
-    },
-    "params: %@" : {
-
     },
     "PlayCover 链接…" : {
       "localizations" : {
@@ -1434,6 +1434,9 @@
           }
         }
       }
+    },
+    "Task started" : {
+
     },
     "TaskError %@" : {
       "localizations" : {

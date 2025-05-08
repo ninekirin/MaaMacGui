@@ -7,24 +7,14 @@
 
 import Foundation
 
-struct CopilotItemConfiguration: Codable {
-    var enabled: Bool = true
-    var filename: String
-    var name: String
-    var is_raid: Bool = false
-    var need_navigate = true
-    var navigate_name: String?
-}
-
 struct CopilotListConfiguration: Codable {
     var enabled: Bool = true
     var items: [CopilotItemConfiguration] = []
-    var formation: Bool = false
+    var formation: Bool = true
     var add_trust: Bool = false
     var use_sanity_potion: Bool = false
 }
 
-// Extension to allow encoding to JSON string
 extension CopilotListConfiguration {
     func jsonString() throws -> String {
         let encoder = JSONEncoder()
