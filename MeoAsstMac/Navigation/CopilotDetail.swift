@@ -17,7 +17,12 @@ struct CopilotDetail: View {
         VStack {
             if viewModel.status == .idle {
                 if viewModel.useCopilotList {
-                    CopilotListSettings()
+                    switch viewModel.copilotDetailMode {
+                    case .copilotConfig:
+                        CopilotListSettings()
+                    case .log:
+                        LogView()
+                    }
                 } else if let url {
                     CopilotView(url: url)
                 }
@@ -47,25 +52,24 @@ struct CopilotDetail: View {
 
     @ToolbarContentBuilder private func detailToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
-            if !viewModel.useCopilotList {  // 只在非战斗列表模式显示
-                Button {
-                    showAdd = true
-                } label: {
-                    Label("添加", systemImage: "plus")
-                }
-                .help("添加作业")
-                .popover(isPresented: $showAdd, arrowEdge: .bottom, content: addPopover)
+            Button {
+                showAdd = true
+            } label: {
+                Label("添加", systemImage: "plus")
             }
+            .help("添加作业")
+            .popover(isPresented: $showAdd, arrowEdge: .bottom, content: addPopover)
         }
 
         ToolbarItemGroup {
-            Button {
-                viewModel.copilotDetailMode = .log
-            } label: {
-                Label("日志", systemImage: "note.text")
-                    .foregroundColor(url == nil ? Color.accentColor : nil)
+            HStack {
+                Divider()
+                
+                if viewModel.useCopilotList {
+                    ViewDetailTabButton(mode: .copilotConfig, icon: "gearshape", selection: $viewModel.copilotDetailMode)
+                }
+                ViewDetailTabButton(mode: .log, icon: "note.text", selection: $viewModel.copilotDetailMode)
             }
-            .help("运行日志")
         }
     }
 
@@ -117,6 +121,21 @@ struct CopilotDetail: View {
         }
         .frame(width: 200)
         .padding()
+    }
+}
+
+struct ViewDetailTabButton: View {
+    let mode: MAAViewModel.CopilotDetailMode
+    let icon: String
+    @Binding var selection: MAAViewModel.CopilotDetailMode
+
+    var body: some View {
+        Button {
+            selection = mode
+        } label: {
+            Image(systemName: icon)
+                .foregroundColor(mode == selection ? Color.accentColor : nil)
+        }
     }
 }
 
