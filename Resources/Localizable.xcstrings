@@ -367,6 +367,16 @@
         }
       }
     },
+    "CopilotListError" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动战斗列表出错，已停止执行后续任务"
+          }
+        }
+      }
+    },
     "CurrentStage %@" : {
       "localizations" : {
         "ko" : {
@@ -1387,9 +1397,6 @@
         }
       }
     },
-    "Starting Copilot List" : {
-
-    },
     "StartTask %@" : {
       "localizations" : {
         "ko" : {
@@ -2229,6 +2236,9 @@
     "开始唤醒" : {
 
     },
+    "开始添加战斗列表" : {
+
+    },
     "开局分队" : {
 
     },
@@ -2575,6 +2585,16 @@
     },
     "添加作业" : {
 
+    },
+    "添加关卡: %@ (%@), taskId: %d" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "添加关卡: %1$@ (%2$@), taskId: %3$d"
+          }
+        }
+      }
     },
     "添加到战斗列表" : {
 

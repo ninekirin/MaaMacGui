@@ -139,6 +139,12 @@ extension MAAViewModel {
             logError("TaskError \(taskChain)")
             if isCopilot {
                 logError("CombatError")
+                if useCopilotList {
+                    logError("CopilotListError")
+                    Task {
+                        try await stop()
+                    }
+                }
             }
 
         case .TaskChainStart:

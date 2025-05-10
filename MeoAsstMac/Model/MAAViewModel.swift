@@ -512,9 +512,9 @@ extension MAAViewModel {
         defer { handleEarlyReturn(backTo: .idle) }
 
         if useCopilotList {
-            logTrace("Starting Copilot List")
-
             try await ensureHandle()
+
+            logTrace("开始添加战斗列表")
 
             for (index, item) in copilotListConfig.items.enumerated() where item.enabled {
                 currentCopilotIndex = index
@@ -540,6 +540,8 @@ extension MAAViewModel {
                 if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
                     currentTaskId = taskId
                 }
+
+                logTrace("添加关卡: \(item.name) (\(item.is_raid ? "突袭" : "普通")), taskId: \(currentTaskId ?? -1)")
             }
 
             guard currentTaskId != nil else {
@@ -591,9 +593,19 @@ extension MAAViewModel {
 
         // Get navigation map name
         guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
-            logError("Map '\(stage_name)' not found, resource update may be needed")
-            // Show resource update dialog
-            showResourceUpdate = true
+            logError("找不到关卡 '\(stage_name)' 的地图数据，请求更新资源")
+            
+            let alert = NSAlert()
+            alert.messageText = "地图数据不存在"
+            alert.informativeText = "找不到关卡 '\(stage_name)' 的地图数据，是否需要更新资源？"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "更新")
+            alert.addButton(withTitle: "取消")
+            
+            let response = alert.runModal()
+            if response == .alertFirstButtonReturn {
+                showResourceUpdate = true
+            }
             return
         }
 
