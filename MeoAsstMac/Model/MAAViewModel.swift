@@ -855,6 +855,9 @@ extension MAAViewModel {
 
     func deleteCopilot(url: URL) {
         copilots.remove(url)
+        
+        copilotListConfig.items.removeAll(where: { $0.filename == url.path })
+        
         guard canDeleteFile(url) else { return }
         try? FileManager.default.removeItem(at: url)
     }
