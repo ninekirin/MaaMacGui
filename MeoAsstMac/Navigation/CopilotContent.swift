@@ -10,20 +10,17 @@ import SwiftUI
 struct CopilotContent: View {
     @EnvironmentObject private var viewModel: MAAViewModel
     @Binding var selection: URL?
-    
+
     private func toggleCopilotList() {
         viewModel.useCopilotList.toggle()
     }
-    
+
     var body: some View {
         Group {
             if viewModel.useCopilotList {
                 CopilotList()
             } else {
-                RegularCopilotList(
-                    selection: $selection,
-                    onDeleteCopilot: deleteCopilot
-                )
+                RegularCopilotList(selection: $selection)
             }
         }
         .toolbar(content: listToolbar)
@@ -73,36 +70,36 @@ struct CopilotContent: View {
             }
         }
     }
-    
+
     // MARK: - Actions
-    
+
     private func stop() {
         Task {
             try await viewModel.stop()
         }
     }
-    
+
     private func start() {
         Task {
             viewModel.copilotDetailMode = .log
             try await viewModel.startCopilot()
         }
     }
-    
+
     private func deleteCopilot(url: URL) {
-        try? FileManager.default.removeItem(at: url)
+        viewModel.deleteCopilot(url: url)
     }
-    
+
     // MARK: - Helpers
-    
+
     private func canDelete(_ url: URL?) -> Bool {
         guard let url else { return false }
-        
+
         let bundledPath = Bundle.main.resourceURL!
             .appendingPathComponent("resource")
             .appendingPathComponent("copilot")
             .path
-            
+
         return !url.path.starts(with: bundledPath)
     }
 }

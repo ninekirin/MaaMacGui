@@ -96,9 +96,12 @@ import SwiftUI
     @Published var currentCopilotStatus: CopilotTaskStatus?
 
     @Published var copilot: CopilotConfiguration?
-    @Published var downloadCopilot: String?
     @Published var showImportCopilot = false
     @Published var copilotDetailMode: CopilotDetailMode = .log
+
+    @Published var copilots = Set<URL>()
+    @Published var downloading = false
+    @Published var expanded = false
 
     @AppStorage("MAAUseCopilotList") var useCopilotList = false
 
@@ -196,6 +199,9 @@ import SwiftUI
             fileLogger = FileLogger()
             logError("日志文件出错: \(error.localizedDescription)")
         }
+
+        // REMOVEME: Initialize copilots
+        loadUserCopilots()
 
         // REMOVEME: Initialize copilotListConfig from savedCopilotListConfig
         if let data = savedCopilotListConfig.data(using: .utf8),
@@ -594,14 +600,14 @@ extension MAAViewModel {
         // Get navigation map name
         guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
             logError("找不到关卡 '\(stage_name)' 的地图数据，请求更新资源")
-            
+
             let alert = NSAlert()
             alert.messageText = "地图数据不存在"
             alert.informativeText = "找不到关卡 '\(stage_name)' 的地图数据，是否需要更新资源？"
             alert.alertStyle = .warning
             alert.addButton(withTitle: "更新")
             alert.addButton(withTitle: "取消")
-            
+
             let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 showResourceUpdate = true
@@ -799,5 +805,179 @@ extension MAAViewModel {
     func stopGame() async throws {
         guard let client = await MaaToolClient(address: connectionAddress) else { return }
         try await client.terminate()
+    }
+}
+
+// MARK: - Copilot Management
+
+extension MAAViewModel {
+    func loadUserCopilots() {
+        copilots.formUnion(externalDirectory.copilots)
+        copilots.formUnion(recordingDirectory.copilots)
+    }
+
+    func addCopilots(_ providers: [NSItemProvider]) -> Bool {
+        Task {
+            for provider in providers {
+                if let url = try? await provider.loadURL() {
+                    let value = try? url.resourceValues(forKeys: [.contentTypeKey])
+                    if value?.contentType == .json {
+                        copilots.insert(url)
+                    } else if value?.contentType?.conforms(to: .movie) == true {
+                        try? await recognizeVideo(video: url)
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    func addCopilots(_ results: Result<[URL], Error>) {
+        if case let .success(urls) = results {
+            copilots.formUnion(urls)
+        }
+    }
+
+    func downloadCopilot(id: String?) {
+        guard let id else { return }
+
+        let file =
+            externalDirectory
+            .appendingPathComponent(id)
+            .appendingPathExtension("json")
+
+        let url = URL(string: "https://prts.maa.plus/copilot/get/\(id)")!
+        Task {
+            self.downloading = true
+            do {
+                let data = try await URLSession.shared.data(from: url).0
+                let response = try JSONDecoder().decode(CopilotResponse.self, from: data)
+                try response.data.content.write(toFile: file.path, atomically: true, encoding: .utf8)
+                copilots.insert(file)
+                logInfo("下载成功: \(file.lastPathComponent)")
+            } catch {
+                print(error)
+            }
+            self.downloading = false
+        }
+    }
+
+    func deleteCopilot(url: URL) {
+        if !url.path.starts(with: bundledDirectory.path) {
+            copilots.remove(url)
+        }
+    }
+
+    var bundledDirectory: URL {
+        Bundle.main.resourceURL!
+            .appendingPathComponent("resource")
+            .appendingPathComponent("copilot")
+    }
+
+    var externalDirectory: URL {
+        let directory = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask)
+            .first!
+            .appendingPathComponent("copilot")
+
+        if !FileManager.default.fileExists(atPath: directory.path) {
+            try? FileManager.default.createDirectory(
+                at: directory, withIntermediateDirectories: true)
+        }
+
+        return directory
+    }
+
+    var recordingDirectory: URL {
+        FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first!
+            .appendingPathComponent("cache")
+            .appendingPathComponent("CombatRecord")
+    }
+}
+
+// MARK: - Value Extensions
+
+extension URL {
+    var copilots: [URL] {
+        guard
+            let urls = try? FileManager.default.contentsOfDirectory(
+                at: self,
+                includingPropertiesForKeys: [.contentTypeKey],
+                options: .skipsHiddenFiles)
+        else { return [] }
+
+        return urls.filter { url in
+            let value = try? url.resourceValues(forKeys: [.contentTypeKey])
+            return value?.contentType == .json
+        }
+        .sorted { lhs, rhs in
+            lhs.lastPathComponent < rhs.lastPathComponent
+        }
+    }
+}
+
+extension Set where Element == URL {
+    var urls: [URL] { sorted { $0.lastPathComponent < $1.lastPathComponent } }
+}
+
+// MARK: - Download Model
+
+private struct CopilotResponse: Codable {
+    let data: CopilotData
+
+    struct CopilotData: Codable {
+        let content: String
+    }
+}
+
+// MARK: - NSItemProvider Extension
+
+extension NSItemProvider {
+    @MainActor fileprivate func loadURL() async throws -> URL {
+        let handle = ProgressActor()
+
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                let progress = loadObject(ofClass: URL.self) { object, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+
+                    guard let object else {
+                        continuation.resume(throwing: MAAError.emptyItemObject)
+                        return
+                    }
+
+                    continuation.resume(returning: object)
+                }
+
+                Task {
+                    await handle.bind(progress: progress)
+                }
+            }
+        } onCancel: {
+            Task {
+                await handle.cancel()
+            }
+        }
+    }
+}
+
+private actor ProgressActor {
+    private var progress: Progress?
+    private var cancelled = false
+
+    func bind(progress: Progress) {
+        guard !cancelled else { return }
+        self.progress = progress
+        progress.resume()
+    }
+
+    func cancel() {
+        cancelled = true
+        progress?.cancel()
     }
 }

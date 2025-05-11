@@ -64,9 +64,10 @@ struct CopilotDetail: View {
         ToolbarItemGroup {
             HStack {
                 Divider()
-                
+
                 if viewModel.useCopilotList {
-                    ViewDetailTabButton(mode: .copilotConfig, icon: "gearshape", selection: $viewModel.copilotDetailMode)
+                    ViewDetailTabButton(
+                        mode: .copilotConfig, icon: "gearshape", selection: $viewModel.copilotDetailMode)
                 }
                 ViewDetailTabButton(mode: .log, icon: "note.text", selection: $viewModel.copilotDetailMode)
             }
@@ -88,7 +89,7 @@ struct CopilotDetail: View {
             Divider()
 
             Button {
-                viewModel.downloadCopilot = prtsCode.parsedID
+                viewModel.downloadCopilot(id: prtsCode.parsedID)
                 showAdd = false
             } label: {
                 Label("下载作业", systemImage: "arrow.down.doc")
@@ -102,7 +103,7 @@ struct CopilotDetail: View {
                     let parsedID = clipboardString.parsedID
                 {
                     prtsCode = clipboardString
-                    viewModel.downloadCopilot = parsedID
+                    viewModel.downloadCopilot(id: parsedID)
                     showAdd = false
                 }
             } label: {
