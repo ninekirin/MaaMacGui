@@ -14,6 +14,7 @@ struct CopilotContent: View {
     private func toggleCopilotList() {
         viewModel.useCopilotList.toggle()
         if viewModel.useCopilotList && viewModel.status == .idle {
+            // 战斗列表模式，未开始作业默认展示全局设置
             viewModel.copilotDetailMode = .copilotConfig
         }
     }
@@ -27,8 +28,10 @@ struct CopilotContent: View {
             }
         }
         .toolbar(content: listToolbar)
+        // 这里我不太会处理双向数据绑定，先用这种方式
         .onChange(of: selection) { newValue in
             viewModel.selectedCopilotURL = newValue
+            viewModel.copilotDetailMode = newValue == nil ? .log : .copilotConfig
         }
         .onChange(of: viewModel.selectedCopilotURL) { newValue in
             selection = newValue

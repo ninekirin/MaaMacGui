@@ -97,11 +97,10 @@ import SwiftUI
 
     @Published var copilot: CopilotConfiguration?
     @Published var showImportCopilot = false
-    @Published var copilotDetailMode: CopilotDetailMode = .copilotConfig
+    @Published var copilotDetailMode: CopilotDetailMode = .log
 
     @Published var copilots = Set<URL>()
     @Published var downloading = false
-    @Published var expanded = false
     @Published var selectedCopilotURL: URL?
 
     @AppStorage("MAAUseCopilotList") var useCopilotList = false
@@ -858,7 +857,6 @@ extension MAAViewModel {
                 copilots.insert(file)
                 logInfo("下载成功: \(file.lastPathComponent)")
                 self.useCopilotList = false
-                self.copilotDetailMode = .copilotConfig
                 self.selectedCopilotURL = file
             } catch {
                 print(error)

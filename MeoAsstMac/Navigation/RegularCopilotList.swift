@@ -11,11 +11,13 @@ struct RegularCopilotList: View {
     @EnvironmentObject private var viewModel: MAAViewModel
     @Binding var selection: URL?
 
+    @State private var expanded = false
+
     private var bundledCopilots: [URL] { viewModel.bundledDirectory.copilots }
 
     var body: some View {
         List(selection: $selection) {
-            DisclosureGroup(isExpanded: $viewModel.expanded) {
+            DisclosureGroup(isExpanded: $expanded) {
                 ForEach(bundledCopilots, id: \.self) { url in
                     Text(url.lastPathComponent)
                 }
@@ -28,7 +30,7 @@ struct RegularCopilotList: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         withAnimation {
-                            viewModel.expanded.toggle()
+                            expanded.toggle()
                         }
                     }
             }

@@ -64,10 +64,10 @@ struct CopilotDetail: View {
                 Divider()
 
                 if viewModel.useCopilotList {
-                    ViewDetailTabButton(
+                    CopilotDetailTabButton(
                         mode: .copilotConfig, icon: "gearshape", selection: $viewModel.copilotDetailMode)
                 }
-                ViewDetailTabButton(mode: .log, icon: "note.text", selection: $viewModel.copilotDetailMode)
+                CopilotDetailTabButton(mode: .log, icon: "note.text", selection: $viewModel.copilotDetailMode)
             }
         }
     }
@@ -123,7 +123,7 @@ struct CopilotDetail: View {
     }
 }
 
-struct ViewDetailTabButton: View {
+struct CopilotDetailTabButton: View {
     let mode: MAAViewModel.CopilotDetailMode
     let icon: String
     @Binding var selection: MAAViewModel.CopilotDetailMode
