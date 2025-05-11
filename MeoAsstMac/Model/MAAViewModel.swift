@@ -574,7 +574,7 @@ extension MAAViewModel {
 
         // Get navigation map name
         guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
-            logError("找不到关卡 '\(stage_name)' 的地图数据，请求更新资源")
+            logError("找不到关卡 '\(stage_name)' 的地图数据，请更新资源")
 
             let alert = NSAlert()
             alert.messageText = "地图数据不存在"
