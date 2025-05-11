@@ -102,6 +102,7 @@ import SwiftUI
     @Published var copilots = Set<URL>()
     @Published var downloading = false
     @Published var expanded = false
+    @Published var selectedCopilotURL: URL?
 
     @AppStorage("MAAUseCopilotList") var useCopilotList = false
 
@@ -828,6 +829,7 @@ extension MAAViewModel {
                     }
                 }
             }
+            self.selectedCopilotURL = self.copilots.urls.last
         }
         return true
     }
@@ -838,8 +840,8 @@ extension MAAViewModel {
         }
     }
 
-    func downloadCopilot(id: String?) -> URL? {
-        guard let id else { return nil }
+    func downloadCopilot(id: String?) {
+        guard let id else { return }
 
         let file =
             externalDirectory
@@ -856,13 +858,14 @@ extension MAAViewModel {
                 copilots.insert(file)
                 logInfo("下载成功: \(file.lastPathComponent)")
                 self.useCopilotList = false
+                self.copilotDetailMode = .copilotConfig
+                self.selectedCopilotURL = file
             } catch {
                 print(error)
                 logInfo("下载失败: \(error.localizedDescription)")
             }
             self.downloading = false
         }
-        return file
     }
 
     func deleteCopilot(url: URL) {

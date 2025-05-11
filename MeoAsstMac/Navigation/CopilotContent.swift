@@ -27,6 +27,12 @@ struct CopilotContent: View {
             }
         }
         .toolbar(content: listToolbar)
+        .onChange(of: selection) { newValue in
+            viewModel.selectedCopilotURL = newValue
+        }
+        .onChange(of: viewModel.selectedCopilotURL) { newValue in
+            selection = newValue
+        }
     }
 
     @ToolbarContentBuilder private func listToolbar() -> some ToolbarContent {
