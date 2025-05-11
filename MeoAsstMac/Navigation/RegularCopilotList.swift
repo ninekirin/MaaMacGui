@@ -36,17 +36,6 @@ struct RegularCopilotList: View {
             Section {
                 ForEach(viewModel.copilots.urls, id: \.self) { url in
                     Text(url.lastPathComponent)
-                        .contextMenu {
-                            if !url.path.starts(with: viewModel.bundledDirectory.path) {
-                                Button(role: .destructive) {
-                                    if !url.path.starts(with: viewModel.bundledDirectory.path) {
-                                        viewModel.deleteCopilot(url: url)
-                                    }
-                                } label: {
-                                    Label("移除", systemImage: "trash")
-                                }
-                            }
-                        }
                 }
             } header: {
                 HStack {

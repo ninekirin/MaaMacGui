@@ -97,7 +97,7 @@ import SwiftUI
 
     @Published var copilot: CopilotConfiguration?
     @Published var showImportCopilot = false
-    @Published var copilotDetailMode: CopilotDetailMode = .log
+    @Published var copilotDetailMode: CopilotDetailMode = .copilotConfig
 
     @Published var copilots = Set<URL>()
     @Published var downloading = false
@@ -838,8 +838,8 @@ extension MAAViewModel {
         }
     }
 
-    func downloadCopilot(id: String?) {
-        guard let id else { return }
+    func downloadCopilot(id: String?) -> URL? {
+        guard let id else { return nil }
 
         let file =
             externalDirectory
@@ -855,17 +855,27 @@ extension MAAViewModel {
                 try response.data.content.write(toFile: file.path, atomically: true, encoding: .utf8)
                 copilots.insert(file)
                 logInfo("下载成功: \(file.lastPathComponent)")
+                self.useCopilotList = false
             } catch {
                 print(error)
+                logInfo("下载失败: \(error.localizedDescription)")
             }
             self.downloading = false
         }
+        return file
     }
 
     func deleteCopilot(url: URL) {
-        if !url.path.starts(with: bundledDirectory.path) {
-            copilots.remove(url)
-        }
+        copilots.remove(url)
+        guard canDeleteFile(url) else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    func canDeleteFile(_ url: URL?) -> Bool {
+        [externalDirectory, recordingDirectory]
+            .compactMap { url?.path.starts(with: $0.path) }
+            .first(where: { $0 })
+            ?? false
     }
 
     var bundledDirectory: URL {

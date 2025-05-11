@@ -13,6 +13,9 @@ struct CopilotContent: View {
 
     private func toggleCopilotList() {
         viewModel.useCopilotList.toggle()
+        if viewModel.useCopilotList && viewModel.status == .idle {
+            viewModel.copilotDetailMode = .copilotConfig
+        }
     }
 
     var body: some View {
@@ -29,15 +32,11 @@ struct CopilotContent: View {
     @ToolbarContentBuilder private func listToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
             if !viewModel.useCopilotList {  // 只在非战斗列表模式显示移除按钮
-                Button(action: {
-                    if let selection {
-                        deleteCopilot(url: selection)
-                    }
-                }) {
+                Button(action: deleteSelectedCopilot) {
                     Label("移除", systemImage: "trash")
                 }
                 .help("移除作业")
-                .disabled(!canDelete(selection))
+                .disabled(shouldDisableDeletion)
                 .keyboardShortcut(.delete, modifiers: [.command])
             }
 
@@ -86,21 +85,28 @@ struct CopilotContent: View {
         }
     }
 
-    private func deleteCopilot(url: URL) {
-        viewModel.deleteCopilot(url: url)
+    private func deleteSelectedCopilot() {
+        guard let selection, let index = viewModel.copilots.urls.firstIndex(of: selection) else { return }
+
+        viewModel.deleteCopilot(url: selection)
+
+        // After deletion, select next item or last item
+        let urls = viewModel.copilots.urls
+        if index < urls.count {
+            self.selection = urls[index]
+        } else {
+            self.selection = urls.last
+        }
     }
 
-    // MARK: - Helpers
+    // MARK: - State Wrappers
 
-    private func canDelete(_ url: URL?) -> Bool {
-        guard let url else { return false }
+    private var shouldDisableDeletion: Bool {
+        selection == nil || isBundled(selection)
+    }
 
-        let bundledPath = Bundle.main.resourceURL!
-            .appendingPathComponent("resource")
-            .appendingPathComponent("copilot")
-            .path
-
-        return !url.path.starts(with: bundledPath)
+    private func isBundled(_ url: URL?) -> Bool {
+        return url?.path.starts(with: viewModel.bundledDirectory.path) ?? false
     }
 }
 
