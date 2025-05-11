@@ -1028,9 +1028,6 @@
         }
       }
     },
-    "No enabled tasks" : {
-
-    },
     "NoDrop" : {
       "localizations" : {
         "ko" : {
@@ -2589,12 +2586,12 @@
     "添加作业" : {
 
     },
-    "添加关卡: %@ (%@), taskId: %d" : {
+    "添加关卡: %@ (%@ %@)" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "添加关卡: %1$@ (%2$@), taskId: %3$d"
+            "value" : "添加关卡: %1$@ (%2$@ %3$@)"
           }
         }
       }

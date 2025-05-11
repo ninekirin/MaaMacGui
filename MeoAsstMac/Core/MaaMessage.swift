@@ -150,12 +150,9 @@ extension MAAViewModel {
         case .TaskChainStart:
             if let id = taskID(taskDetails: message.details) {
                 taskStatus[id] = .running
-                // Update currentTaskId for tracking
-                if isCopilot && useCopilotList {
-                    if let coreId = message.details["taskid"].int32 {
-                        currentTaskId = coreId
-                    }
-                }
+                // if isCopilot && useCopilotList {
+                //    TODO: Track Copilot Execution
+                // }
             }
             logTrace("StartTask \(taskChain)")
 

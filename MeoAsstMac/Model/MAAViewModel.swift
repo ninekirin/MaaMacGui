@@ -85,16 +85,6 @@ import SwiftUI
         case log
     }
 
-    enum CopilotTaskStatus {
-        case success
-        case failure
-        case running
-    }
-
-    @Published var currentCopilotIndex: Int?
-    @Published var currentTaskId: Int32?
-    @Published var currentCopilotStatus: CopilotTaskStatus?
-
     @Published var copilot: CopilotConfiguration?
     @Published var showImportCopilot = false
     @Published var copilotDetailMode: CopilotDetailMode = .log
@@ -523,7 +513,6 @@ extension MAAViewModel {
             logTrace("开始添加战斗列表")
 
             for (index, item) in copilotListConfig.items.enumerated() where item.enabled {
-                currentCopilotIndex = index
 
                 let config = RegularCopilotConfiguration(
                     filename: item.filename,
@@ -541,20 +530,12 @@ extension MAAViewModel {
                     continue
                 }
 
-                currentCopilotStatus = .running
+                _ = try await handle?.appendTask(type: .Copilot, params: params)
 
-                if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
-                    currentTaskId = taskId
-                }
-
-                logTrace("添加关卡: \(item.name) (\(item.is_raid ? "突袭" : "普通")), taskId: \(currentTaskId ?? -1)")
+                logTrace("添加关卡: \(item.name) (\(item.navigate_name) \(item.is_raid ? "突袭" : "普通"))")
             }
 
-            guard currentTaskId != nil else {
-                logTrace("No enabled tasks")
-                currentCopilotIndex = nil
-                return
-            }
+            // TODO: If no task is added, log a warning
 
             try await handle?.start()
 
@@ -567,17 +548,11 @@ extension MAAViewModel {
 
             try await ensureHandle()
 
-            currentCopilotStatus = .running
-
             switch copilot {
             case .regular:
-                if let taskId = try await handle?.appendTask(type: .Copilot, params: params) {
-                    currentTaskId = taskId
-                }
+                _ = try await handle?.appendTask(type: .Copilot, params: params)
             case .sss:
-                if let taskId = try await handle?.appendTask(type: .SSSCopilot, params: params) {
-                    currentTaskId = taskId
-                }
+                _ = try await handle?.appendTask(type: .SSSCopilot, params: params)
             }
 
             try await handle?.start()
