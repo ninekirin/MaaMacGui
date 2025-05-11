@@ -512,6 +512,11 @@ extension MAAViewModel {
 
             logTrace("开始添加战斗列表")
 
+            guard let _ = copilotListConfig.items.firstIndex(where: { $0.enabled }) else {
+                logTrace("没有启用的战斗列表任务")
+                return
+            }
+
             for (index, item) in copilotListConfig.items.enumerated() where item.enabled {
 
                 let config = RegularCopilotConfiguration(
