@@ -95,6 +95,9 @@ import SwiftUI
 
     @AppStorage("MAAUseCopilotList") var useCopilotList = false
 
+    // 新增一个变量用于指示当前是否正在执行战斗列表
+    @Published var isCopilotListRunning = false
+
     private var updatingCopilotListConfig = false
 
     @AppStorage("MAACopilotListConfig") private var savedCopilotListConfig: String = "{}" {
@@ -510,14 +513,14 @@ extension MAAViewModel {
         if useCopilotList {
             try await ensureHandle()
 
-            logTrace("开始添加战斗列表")
+            logTrace("开始添加任务到战斗列表")
 
-            guard let _ = copilotListConfig.items.firstIndex(where: { $0.enabled }) else {
+            guard copilotListConfig.items.firstIndex(where: { $0.enabled }) != nil else {
                 logTrace("没有启用的战斗列表任务")
                 return
             }
 
-            for (index, item) in copilotListConfig.items.enumerated() where item.enabled {
+            for (_, item) in copilotListConfig.items.enumerated() where item.enabled {
 
                 let config = RegularCopilotConfiguration(
                     filename: item.filename,
@@ -535,13 +538,17 @@ extension MAAViewModel {
                     continue
                 }
 
-                _ = try await handle?.appendTask(type: .Copilot, params: params)
+                logTrace("添加关卡：\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")")
 
-                logTrace("添加关卡: \(item.name) (\(item.navigate_name) \(item.is_raid ? "突袭" : "普通"))")
+                do {
+                    _ = try await handle?.appendTask(type: .Copilot, params: params)
+                } catch {
+                    logError("添加关卡失败: \(error.localizedDescription)")
+                    return
+                }
             }
 
-            // TODO: If no task is added, log a warning
-
+            isCopilotListRunning = true
             try await handle?.start()
 
         } else {

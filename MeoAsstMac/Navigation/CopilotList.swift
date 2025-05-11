@@ -13,8 +13,6 @@ struct CopilotList: View {
     var body: some View {
         List {
             Section("战斗列表（自动模式）") {
-                // REMOVEME: \.0 使用枚举的索引（即数组的位置）作为唯一标识
-                // REMOVEME: \.1.name 使用每个元素的 item.name 作为唯一标识
                 ForEach(Array(viewModel.copilotListConfig.items.enumerated()), id: \.0) { index, item in
                     HStack {
                         Toggle(

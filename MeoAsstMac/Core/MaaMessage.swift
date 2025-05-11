@@ -111,6 +111,15 @@ extension MAAViewModel {
 
         let isCopilot = ["Copilot", "VideoRecognition"].contains(taskChain)
 
+        // 获取当前启用的Copilot关卡名
+        func currentCopilotStageName() -> String? {
+            guard isCopilotListRunning else { return nil }
+            // return copilotListConfig.items.first(where: { $0.enabled })?.name
+            return copilotListConfig.items.first(where: { $0.enabled }).map { item in
+                "\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")"
+            }
+        }
+
         if taskChain == "CloseDown" {
             Task {
                 try await stop()
@@ -136,23 +145,27 @@ extension MAAViewModel {
             if let id = taskID(taskDetails: message.details) {
                 taskStatus[id] = .failure
             }
-            logError("TaskError \(taskChain)")
             if isCopilot {
                 logError("CombatError")
-                if useCopilotList {
-                    logError("CopilotListError")
-                    Task {
-                        try await stop()
+                if isCopilotListRunning {
+                    // 失败时立即停止
+                    Task { try await stop() }
+                    self.copilotListConfig = copilotListConfig
+                    if let stage = currentCopilotStageName() {
+                        logError("战斗出错：\(stage)")
                     }
+                    isCopilotListRunning = false
+                    logError("CopilotListError")
                 }
             }
+            logError("TaskError \(taskChain)")
 
         case .TaskChainStart:
             if let id = taskID(taskDetails: message.details) {
                 taskStatus[id] = .running
-                // if isCopilot && useCopilotList {
-                //    TODO: Track Copilot Execution
-                // }
+            }
+            if isCopilot, let stage = currentCopilotStageName() {
+                logInfo("开始关卡：\(stage)")
             }
             logTrace("StartTask \(taskChain)")
 
@@ -178,16 +191,30 @@ extension MAAViewModel {
                 taskStatus[id] = .success
             }
 
-            logTrace("CompleteTask \(taskChain)")
-
             if isCopilot {
                 logInfo("CompleteCombat")
+                if isCopilotListRunning {
+                    if let stage = currentCopilotStageName() {
+                        logInfo("完成关卡：\(stage)")
+                    }
+                    // 成功时取消选中当前任务
+                    if let idx = copilotListConfig.items.firstIndex(where: { $0.enabled }) {
+                        copilotListConfig.items[idx].enabled = false
+                        self.copilotListConfig = copilotListConfig
+                    }
+                }
             }
+
+            logTrace("CompleteTask \(taskChain)")
 
         case .TaskChainExtraInfo:
             break
 
         case .AllTasksCompleted:
+            // 自动战斗列表全部完成
+            if isCopilotListRunning {
+                logInfo("CopilotListCompleted")
+            }
             logTrace("AllTasksComplete")
             resetStatus()
 

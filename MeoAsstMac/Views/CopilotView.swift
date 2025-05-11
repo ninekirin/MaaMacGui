@@ -43,10 +43,7 @@ struct CopilotView: View {
     
     private func addToCopilotList() {
         guard let pilot = copilot else { return }
-        
         viewModel.addToCopilotList(copilot: pilot, url: url)
-        // REMOVE ME: 每次添加是否需要跳转到战斗列表？
-        // viewModel.useCopilotList = true
     }
 
     // MARK: - Copilot Config
