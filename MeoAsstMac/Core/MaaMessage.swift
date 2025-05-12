@@ -143,6 +143,7 @@ extension MAAViewModel {
             if let id = taskID(taskDetails: message.details) {
                 taskStatus[id] = .failure
             }
+            logError("TaskError \(taskChain)")
             if isCopilot {
                 logError("CombatError")
                 if isCopilotListRunning {
@@ -155,7 +156,6 @@ extension MAAViewModel {
                     logError("CopilotListError")
                 }
             }
-            logError("TaskError \(taskChain)")
 
         case .TaskChainStart:
             if let id = taskID(taskDetails: message.details) {
@@ -188,6 +188,8 @@ extension MAAViewModel {
                 taskStatus[id] = .success
             }
 
+            logTrace("CompleteTask \(taskChain)")
+
             if isCopilot {
                 logInfo("CompleteCombat")
                 if isCopilotListRunning {
@@ -201,16 +203,15 @@ extension MAAViewModel {
                 }
             }
 
-            logTrace("CompleteTask \(taskChain)")
-
         case .TaskChainExtraInfo:
             break
 
         case .AllTasksCompleted:
+            logTrace("AllTasksComplete")
             if isCopilotListRunning {
                 logInfo("CopilotListCompleted")
+                isCopilotListRunning = false
             }
-            logTrace("AllTasksComplete")
             resetStatus()
 
         default:
