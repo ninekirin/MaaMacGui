@@ -95,7 +95,6 @@ import SwiftUI
 
     @AppStorage("MAAUseCopilotList") var useCopilotList = false
 
-    // 新增一个变量用于指示当前是否正在执行战斗列表
     @Published var isCopilotListRunning = false
 
     private var updatingCopilotListConfig = false
@@ -582,7 +581,6 @@ extension MAAViewModel {
             return
         }
 
-        // Get navigation map name
         guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
             logError("找不到关卡 '\(stage_name)' 的地图数据，请更新资源")
 
@@ -601,12 +599,11 @@ extension MAAViewModel {
         }
 
         // is_raid: DifficultyFlags == .raid or .normal_raid
-        // If DifficultyFlags is .normal_raid, add two items
+        // If DifficultyFlags is .normal_raid, add normal item first
         let is_raid =
             copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue ||
             copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue
         if copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue {
-            // Add normal item first
             let item = CopilotItemConfiguration(
                 enabled: true,
                 filename: url.path,

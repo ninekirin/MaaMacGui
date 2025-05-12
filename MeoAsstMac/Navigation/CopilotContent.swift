@@ -14,7 +14,7 @@ struct CopilotContent: View {
     private func toggleCopilotList() {
         viewModel.useCopilotList.toggle()
         if viewModel.useCopilotList && viewModel.status == .idle {
-            // 战斗列表模式，未开始作业默认展示全局设置
+            // 战斗列表模式，未运行默认展示全局设置
             viewModel.copilotDetailMode = .copilotConfig
         }
     }
@@ -40,7 +40,7 @@ struct CopilotContent: View {
 
     @ToolbarContentBuilder private func listToolbar() -> some ToolbarContent {
         ToolbarItemGroup {
-            if !viewModel.useCopilotList {  // 只在非战斗列表模式显示移除按钮
+            if !viewModel.useCopilotList {
                 Button(action: deleteSelectedCopilot) {
                     Label("移除", systemImage: "trash")
                 }
@@ -99,7 +99,6 @@ struct CopilotContent: View {
 
         viewModel.deleteCopilot(url: selection)
 
-        // After deletion, select next item or last item
         let urls = viewModel.copilots.urls
         if index < urls.count {
             self.selection = urls[index]
