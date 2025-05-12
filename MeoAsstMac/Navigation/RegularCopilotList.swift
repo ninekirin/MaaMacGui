@@ -54,11 +54,6 @@ struct RegularCopilotList: View {
         .onDrop(of: [.fileURL], isTargeted: .none, perform: viewModel.addCopilots)
         .onReceive(viewModel.$copilotDetailMode, perform: deselectCopilot)
         .onReceive(viewModel.$videoRecoginition, perform: selectNewCopilot)
-        .fileImporter(
-            isPresented: $viewModel.showImportCopilot,
-            allowedContentTypes: [.json],
-            allowsMultipleSelection: true,
-            onCompletion: viewModel.addCopilots)
     }
 
     private func deselectCopilot(_ viewMode: MAAViewModel.CopilotDetailMode) {

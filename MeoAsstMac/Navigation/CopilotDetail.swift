@@ -117,6 +117,11 @@ struct CopilotDetail: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+            .fileImporter(
+                isPresented: $viewModel.showImportCopilot,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: true,
+                onCompletion: viewModel.addCopilots)
         }
         .frame(width: 200)
         .padding()

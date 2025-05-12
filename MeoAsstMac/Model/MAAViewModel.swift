@@ -828,6 +828,7 @@ extension MAAViewModel {
                     }
                 }
             }
+            self.useCopilotList = false
             self.selectedCopilotURL = self.copilots.urls.last
         }
         return true
