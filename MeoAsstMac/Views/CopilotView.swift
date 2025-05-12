@@ -66,7 +66,14 @@ struct CopilotView: View {
                     Label("添加到战斗列表", systemImage: "plus.rectangle.on.rectangle")
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(!binding.formation.wrappedValue)
+
+                if viewModel.copilotListConfig.items.contains(where: { $0.filename == innerConfig.filename }) {
+                    Text("已添加到战斗列表")
+                        .foregroundColor(.green)
+                } else {
+                    Text("未添加到战斗列表")
+                        .foregroundColor(.red)
+                }
             }
 
         case .sss(let innerConfig):

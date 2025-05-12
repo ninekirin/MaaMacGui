@@ -575,9 +575,7 @@ extension MAAViewModel {
 
     func addToCopilotList(copilot: MAACopilot, url: URL) {
         let name = copilot.doc?.title ?? url.lastPathComponent
-        let is_raid = copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue
 
-        // Get stage name
         let stage_name = copilot.stage_name
         guard !stage_name.isEmpty else {
             logError("关卡名不能为空")
@@ -600,6 +598,24 @@ extension MAAViewModel {
                 showResourceUpdate = true
             }
             return
+        }
+
+        // is_raid: DifficultyFlags == .raid or .normal_raid
+        // If DifficultyFlags is .normal_raid, add two items
+        let is_raid =
+            copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue ||
+            copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue
+        if copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue {
+            // Add normal item first
+            let item = CopilotItemConfiguration(
+                enabled: true,
+                filename: url.path,
+                name: name,
+                is_raid: false,
+                need_navigate: true,
+                navigate_name: navigate_name
+            )
+            copilotListConfig.items.append(item)
         }
 
         let item = CopilotItemConfiguration(
@@ -855,9 +871,9 @@ extension MAAViewModel {
 
     func deleteCopilot(url: URL) {
         copilots.remove(url)
-        
+
         copilotListConfig.items.removeAll(where: { $0.filename == url.path })
-        
+
         guard canDeleteFile(url) else { return }
         try? FileManager.default.removeItem(at: url)
     }
