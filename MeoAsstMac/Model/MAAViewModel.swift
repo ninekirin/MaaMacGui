@@ -97,33 +97,9 @@ import SwiftUI
 
     @Published var isCopilotListRunning = false
 
-    private var updatingCopilotListConfig = false
+    @AppStorage("MAACopilotListConfig") private var serializedCopilotListConfig: String?
 
-    @AppStorage("MAACopilotListConfig") private var savedCopilotListConfig: String = "{}" {
-        didSet {
-            guard !updatingCopilotListConfig else { return }
-            updatingCopilotListConfig = true
-            if let data = savedCopilotListConfig.data(using: .utf8),
-                let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data)
-            {
-                copilotListConfig = config
-            }
-            updatingCopilotListConfig = false
-        }
-    }
-
-    @Published var copilotListConfig = CopilotListConfiguration() {
-        didSet {
-            guard !updatingCopilotListConfig else { return }
-            updatingCopilotListConfig = true
-            if let data = try? JSONEncoder().encode(copilotListConfig),
-                let string = String(data: data, encoding: .utf8)
-            {
-                savedCopilotListConfig = string
-            }
-            updatingCopilotListConfig = false
-        }
-    }
+    @Published var copilotListConfig = CopilotListConfiguration()
 
     // MARK: - Recognition
 
@@ -192,15 +168,9 @@ import SwiftUI
             logError("日志文件出错: \(error.localizedDescription)")
         }
 
-        // REMOVEME: Initialize copilots
         loadUserCopilots()
 
-        // REMOVEME: Initialize copilotListConfig from savedCopilotListConfig
-        if let data = savedCopilotListConfig.data(using: .utf8),
-            let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data)
-        {
-            copilotListConfig = config
-        }
+        initCopilotListConfig()
 
         do {
             let data = try Data(contentsOf: tasksURL)
@@ -917,6 +887,37 @@ extension MAAViewModel {
         return copilotListConfig.items.first(where: { $0.enabled }).map { item in
             "\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")"
         }
+    }
+
+    private func initCopilotListConfig() {
+        if let serializedString = serializedCopilotListConfig,
+           let data = serializedString.data(using: .utf8),
+           let config = try? JSONDecoder().decode(CopilotListConfiguration.self, from: data) {
+            self.copilotListConfig = config
+        } else {
+            if serializedCopilotListConfig != nil {
+                 logError("Failed to decode CopilotListConfiguration from saved data.")
+            }
+        }
+
+        $copilotListConfig
+            .sink { [weak self] newConfig in
+                guard let self else { return }
+
+                do {
+                    let data = try JSONEncoder().encode(newConfig)
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        if jsonString != self.serializedCopilotListConfig {
+                            self.serializedCopilotListConfig = jsonString
+                        }
+                    } else {
+                        logError("Failed to serialize CopilotListConfiguration to string.")
+                    }
+                } catch {
+                    logError("Failed to encode CopilotListConfiguration: \(error.localizedDescription)")
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

@@ -509,6 +509,15 @@
         }
       }
     },
+    "Failed to decode CopilotListConfiguration from saved data." : {
+
+    },
+    "Failed to encode CopilotListConfiguration: %@" : {
+
+    },
+    "Failed to serialize CopilotListConfiguration to string." : {
+
+    },
     "FailedToOpenClient" : {
       "localizations" : {
         "ko" : {
