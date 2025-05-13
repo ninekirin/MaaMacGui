@@ -616,7 +616,7 @@ extension MAAViewModel {
                 do {
                     _ = try await handle?.appendTask(type: .Copilot, params: params)
                 } catch {
-                    logError("添加关卡失败: \(error.localizedDescription)")
+                    logError("添加关卡失败：\(error.localizedDescription)")
                     return
                 }
             }
