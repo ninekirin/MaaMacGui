@@ -37,12 +37,8 @@ struct CopilotView: View {
         }
     }
 
-    private var copilot: MAACopilot? {
-        MAACopilot(url: url)
-    }
-    
     private func addToCopilotList() {
-        guard let pilot = copilot else { return }
+        guard let pilot = MAACopilot(url: url) else { return }
         viewModel.addToCopilotList(copilot: pilot, url: url)
     }
 
