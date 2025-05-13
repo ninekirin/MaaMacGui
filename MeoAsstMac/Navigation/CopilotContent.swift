@@ -40,7 +40,9 @@ struct CopilotContent: View {
                 .disabled(shouldDisableDeletion)
                 .keyboardShortcut(.delete, modifiers: [.command])
             }
+        }
 
+        ToolbarItemGroup {
             Button(action: toggleCopilotList) {
                 Label(
                     "战斗列表",
