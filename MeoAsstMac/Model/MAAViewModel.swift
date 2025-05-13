@@ -502,139 +502,6 @@ extension MAAViewModel {
     }
 }
 
-// MARK: Copilot
-
-extension MAAViewModel {
-    func startCopilot() async throws {
-        status = .pending
-        defer { handleEarlyReturn(backTo: .idle) }
-
-        if useCopilotList {
-            try await ensureHandle()
-
-            logTrace("开始添加任务到战斗列表")
-
-            guard copilotListConfig.items.firstIndex(where: { $0.enabled }) != nil else {
-                logTrace("没有启用的战斗列表任务")
-                return
-            }
-
-            for (_, item) in copilotListConfig.items.enumerated() where item.enabled {
-
-                let config = RegularCopilotConfiguration(
-                    filename: item.filename,
-                    formation: copilotListConfig.formation,
-                    add_trust: copilotListConfig.add_trust,
-                    is_raid: item.is_raid,
-                    use_sanity_potion: copilotListConfig.use_sanity_potion,
-                    need_navigate: item.need_navigate,
-                    navigate_name: item.navigate_name
-                )
-
-                let copilot = CopilotConfiguration.regular(config)
-
-                guard let params = copilot.params else {
-                    continue
-                }
-
-                logTrace("添加关卡：\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")")
-
-                do {
-                    _ = try await handle?.appendTask(type: .Copilot, params: params)
-                } catch {
-                    logError("添加关卡失败: \(error.localizedDescription)")
-                    return
-                }
-            }
-
-            isCopilotListRunning = true
-            try await handle?.start()
-
-        } else {
-            guard let copilot,
-                let params = copilot.params
-            else {
-                return
-            }
-
-            try await ensureHandle()
-
-            switch copilot {
-            case .regular:
-                _ = try await handle?.appendTask(type: .Copilot, params: params)
-            case .sss:
-                _ = try await handle?.appendTask(type: .SSSCopilot, params: params)
-            }
-
-            try await handle?.start()
-        }
-
-        status = .busy
-    }
-
-    func addToCopilotList(copilot: MAACopilot, url: URL) {
-        let name = copilot.doc?.title ?? url.lastPathComponent
-
-        let stage_name = copilot.stage_name
-        guard !stage_name.isEmpty else {
-            logError("关卡名不能为空")
-            return
-        }
-
-        guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
-            logError("找不到关卡 '\(stage_name)' 的地图数据，请更新资源")
-
-            let alert = NSAlert()
-            alert.messageText = "地图数据不存在"
-            alert.informativeText = "找不到关卡 '\(stage_name)' 的地图数据，是否需要更新资源？"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "更新")
-            alert.addButton(withTitle: "取消")
-
-            let response = alert.runModal()
-            if response == .alertFirstButtonReturn {
-                showResourceUpdate = true
-            }
-            return
-        }
-
-        // is_raid: DifficultyFlags == .raid or .normal_raid
-        // If DifficultyFlags is .normal_raid, add normal item first
-        let is_raid =
-            copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue ||
-            copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue
-        if copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue {
-            let item = CopilotItemConfiguration(
-                enabled: true,
-                filename: url.path,
-                name: name,
-                is_raid: false,
-                need_navigate: true,
-                navigate_name: navigate_name
-            )
-            copilotListConfig.items.append(item)
-        }
-
-        let item = CopilotItemConfiguration(
-            enabled: true,
-            filename: url.path,
-            name: name,
-            is_raid: is_raid,
-            need_navigate: true,
-            navigate_name: navigate_name,
-        )
-        copilotListConfig.items.append(item)
-    }
-
-    func removeFromCopilotList(at index: Int) {
-        copilotListConfig.items.remove(at: index)
-    }
-
-    func moveCopilotItem(from source: Int, to destination: Int) {
-        copilotListConfig.items.move(fromOffsets: IndexSet(integer: source), toOffset: destination)
-    }
-}
-
 // MARK: Utility
 
 extension MAAViewModel {
@@ -909,6 +776,147 @@ extension MAAViewModel {
             .first!
             .appendingPathComponent("cache")
             .appendingPathComponent("CombatRecord")
+    }
+}
+
+
+// MARK: Copilot List
+
+extension MAAViewModel {
+    func startCopilot() async throws {
+        status = .pending
+        defer { handleEarlyReturn(backTo: .idle) }
+
+        if useCopilotList {
+            try await ensureHandle()
+
+            logTrace("开始添加任务到战斗列表")
+
+            guard copilotListConfig.items.firstIndex(where: { $0.enabled }) != nil else {
+                logTrace("没有启用的战斗列表任务")
+                return
+            }
+
+            for (_, item) in copilotListConfig.items.enumerated() where item.enabled {
+
+                let config = RegularCopilotConfiguration(
+                    filename: item.filename,
+                    formation: copilotListConfig.formation,
+                    add_trust: copilotListConfig.add_trust,
+                    is_raid: item.is_raid,
+                    use_sanity_potion: copilotListConfig.use_sanity_potion,
+                    need_navigate: item.need_navigate,
+                    navigate_name: item.navigate_name
+                )
+
+                let copilot = CopilotConfiguration.regular(config)
+
+                guard let params = copilot.params else {
+                    continue
+                }
+
+                logTrace("添加关卡：\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")")
+
+                do {
+                    _ = try await handle?.appendTask(type: .Copilot, params: params)
+                } catch {
+                    logError("添加关卡失败: \(error.localizedDescription)")
+                    return
+                }
+            }
+
+            isCopilotListRunning = true
+            try await handle?.start()
+
+        } else {
+            guard let copilot,
+                let params = copilot.params
+            else {
+                return
+            }
+
+            try await ensureHandle()
+
+            switch copilot {
+            case .regular:
+                _ = try await handle?.appendTask(type: .Copilot, params: params)
+            case .sss:
+                _ = try await handle?.appendTask(type: .SSSCopilot, params: params)
+            }
+
+            try await handle?.start()
+        }
+
+        status = .busy
+    }
+
+    func addToCopilotList(copilot: MAACopilot, url: URL) {
+        let name = copilot.doc?.title ?? url.lastPathComponent
+
+        let stage_name = copilot.stage_name
+        guard !stage_name.isEmpty else {
+            logError("关卡名不能为空")
+            return
+        }
+
+        guard let navigate_name = MapHelper.findMap(stage_name)?.code else {
+            logError("找不到关卡 '\(stage_name)' 的地图数据，请更新资源")
+
+            let alert = NSAlert()
+            alert.messageText = "地图数据不存在"
+            alert.informativeText = "找不到关卡 '\(stage_name)' 的地图数据，是否需要更新资源？"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "更新")
+            alert.addButton(withTitle: "取消")
+
+            let response = alert.runModal()
+            if response == .alertFirstButtonReturn {
+                showResourceUpdate = true
+            }
+            return
+        }
+
+        // is_raid: DifficultyFlags == .raid or .normal_raid
+        // If DifficultyFlags is .normal_raid, add normal item first
+        let is_raid =
+            copilot.difficulty?.rawValue == DifficultyFlags.raid.rawValue ||
+            copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue
+        if copilot.difficulty?.rawValue == DifficultyFlags.normal_raid.rawValue {
+            let item = CopilotItemConfiguration(
+                enabled: true,
+                filename: url.path,
+                name: name,
+                is_raid: false,
+                need_navigate: true,
+                navigate_name: navigate_name
+            )
+            copilotListConfig.items.append(item)
+        }
+
+        let item = CopilotItemConfiguration(
+            enabled: true,
+            filename: url.path,
+            name: name,
+            is_raid: is_raid,
+            need_navigate: true,
+            navigate_name: navigate_name,
+        )
+        copilotListConfig.items.append(item)
+    }
+
+    func removeFromCopilotList(at index: Int) {
+        copilotListConfig.items.remove(at: index)
+    }
+
+    func moveCopilotItem(from source: Int, to destination: Int) {
+        copilotListConfig.items.move(fromOffsets: IndexSet(integer: source), toOffset: destination)
+    }
+
+    func getCurrentCopilotStageName() -> String? {
+        guard isCopilotListRunning else { return nil }
+        return copilotListConfig.items.first(where: { $0.enabled }).map { item in
+            "\(item.navigate_name) \(item.is_raid ? "突袭" : "普通")"
+        }
     }
 }
 
